@@ -4,10 +4,16 @@
 #include <fstream>
 #include <streambuf>
 
+#ifdef _WIN64
+#define ASSET_SHADER_PATH "../assets/shaders/"
+#else
+#define ASSET_SHADER_PATH "assets/shaders/"
+#endif
+
 int32_t _create_program(std::string vs_shader, std::string fs_shader) {
 
-	std::string vs_path = "assets/shaders/" + vs_shader;
-	std::string fs_path = "assets/shaders/" + fs_shader;
+	std::string vs_path = ASSET_SHADER_PATH + vs_shader;
+	std::string fs_path = ASSET_SHADER_PATH + fs_shader;
 
 	std::ifstream vs_ifstream(vs_path);
 	std::string vs_str((std::istreambuf_iterator<char>(vs_ifstream)),
@@ -76,4 +82,50 @@ int32_t _create_program(std::string vs_shader, std::string fs_shader) {
 	delete[] info_log;
 
 	return program;
+}
+
+void GLAPIENTRY opengl_error_callback(
+	GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam ) {
+	std::string s_source = "";
+	std::string s_type = "";
+	std::string s_severity = "";
+	std::string s_message = std::string( ( char* ) message );
+
+	switch( source ) {
+	case GL_DEBUG_SOURCE_API:             s_source += "GL_DEBUG_SOURCE_API";             break;
+	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   s_source += "GL_DEBUG_SOURCE_WINDOW_SYSTEM";   break;
+	case GL_DEBUG_SOURCE_SHADER_COMPILER: s_source += "GL_DEBUG_SOURCE_SHADER_COMPILER"; break;
+	case GL_DEBUG_SOURCE_THIRD_PARTY:     s_source += "GL_DEBUG_SOURCE_THIRD_PARTY";     break;
+	case GL_DEBUG_SOURCE_APPLICATION:     s_source += "GL_DEBUG_SOURCE_APPLICATION";     break;
+	case GL_DEBUG_SOURCE_OTHER:           s_source += "GL_DEBUG_SOURCE_OTHER";           break;
+	default:                              s_source += "UNKNOWN SOURCE!";                 break;
+	}
+
+	switch( type ) {
+	case GL_DEBUG_TYPE_ERROR:               s_source += "GL_DEBUG_TYPE_ERROR";               break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:	s_source += "GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR"; break;
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  s_source += "GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR";  break;
+	case GL_DEBUG_TYPE_PORTABILITY:         s_source += "GL_DEBUG_TYPE_PORTABILITY";         break;
+	case GL_DEBUG_TYPE_PERFORMANCE:         s_source += "GL_DEBUG_TYPE_PERFORMANCE";         break;
+	case GL_DEBUG_TYPE_MARKER:              s_source += "GL_DEBUG_TYPE_MARKER";              break;
+	case GL_DEBUG_TYPE_PUSH_GROUP:          s_source += "GL_DEBUG_TYPE_PUSH_GROUP";          break;
+	case GL_DEBUG_TYPE_POP_GROUP:           s_source += "GL_DEBUG_TYPE_POP_GROUP";           break;
+	case GL_DEBUG_TYPE_OTHER:               s_source += "GL_DEBUG_TYPE_OTHER";               break;
+	}
+
+	switch( severity ) {
+	case GL_DEBUG_SEVERITY_HIGH:         s_severity = "ERROR";          break;
+	case GL_DEBUG_SEVERITY_MEDIUM:       s_severity = "WARNING";        break;
+	case GL_DEBUG_SEVERITY_LOW:          s_severity = "SOFT WARNING";           break;
+	case GL_DEBUG_SEVERITY_NOTIFICATION: s_severity = "NOTIFICATION";  break;
+	}
+
+	std::string out_log = "[OPENGL][" + s_severity + "][" + s_type + "][" + s_source + "]: " + message;
+	std::cout << out_log << "\n";
 }
