@@ -1,7 +1,6 @@
-#version 120
-#extension GL_EXT_gpu_shader4 : require
+#version 410
 
-varying vec2 uv0;
+out vec2 uv0;
 
 void main() {
 
