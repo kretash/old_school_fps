@@ -7,10 +7,10 @@
             "taskName": "build",
             "command": "g++",
             "args": [
-                "-g",
                 "-std=c++14",
                 "-I/usr/local/include",
                 "-L/usr/local/lib",
+                "-Iinclude/",
                 "-lSDL2",
                 "-lglew",
                 "-framework",
@@ -18,7 +18,8 @@
                 "-o",
                 "build/program.out",
                 "src/main.cc",
-                "src/renderer.cc"
+                "src/renderer.cc",
+                "src/gl_renderer.cc"
             ],
             "presentation": {
                 "reveal": "always",

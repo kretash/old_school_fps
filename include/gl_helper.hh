@@ -4,7 +4,7 @@
 #include <fstream>
 #include <streambuf>
 
-#ifdef _WIN64
+#if defined(_WIN64) || defined(BACK_ASSETS_PATH)
 #define ASSET_SHADER_PATH "../assets/shaders/"
 #else
 #define ASSET_SHADER_PATH "assets/shaders/"
