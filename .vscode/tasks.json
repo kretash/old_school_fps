@@ -19,7 +19,7 @@
                 "build/program.out",
                 "src/main.cc",
                 "src/renderer.cc",
-                "src/gl_renderer.cc"
+                "src/window.cc"
             ],
             "presentation": {
                 "reveal": "always",

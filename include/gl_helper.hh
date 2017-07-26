@@ -1,37 +1,53 @@
 #pragma once
 #include <stdint.h>
+#include <vector>
 #include <string>
 #include <fstream>
 #include <streambuf>
 
-#if defined(_WIN64) || defined(BACK_ASSETS_PATH)
+#if defined(_WIN64)
+#define ASSET_SHADER_PATH "../../assets/shaders/"
+#elif defined(BACK_ASSETS_PATH)
 #define ASSET_SHADER_PATH "../assets/shaders/"
 #else
 #define ASSET_SHADER_PATH "assets/shaders/"
 #endif
 
+const std::vector<std::string> _paths = 
+{
+    "assets/shaders/",
+    "../assets/shaders/",
+    "../../assets/shaders/"
+};
+
 int32_t _create_program(std::string vs_shader, std::string fs_shader) {
 
-	std::string vs_path = ASSET_SHADER_PATH + vs_shader;
-	std::string fs_path = ASSET_SHADER_PATH + fs_shader;
+    std::string vs_str = "";
+    std::string fs_str = "";
 
-	std::ifstream vs_ifstream(vs_path);
-	std::string vs_str((std::istreambuf_iterator<char>(vs_ifstream)),
-		std::istreambuf_iterator<char>());
+    for( auto path : _paths ){
+	    std::string vs_path = path + vs_shader;
 
-	if (vs_str.size() == 0) {
-		std::cout << "Vertex shader not found \n";
-		return -1;
-	}
+	    std::ifstream vs_ifstream(vs_path);
+        vs_str = std::string((std::istreambuf_iterator<char>(vs_ifstream)),
+		    std::istreambuf_iterator<char>());
 
-	std::ifstream fs_ifstream(fs_path);
-	std::string fs_str((std::istreambuf_iterator<char>(fs_ifstream)),
-		std::istreambuf_iterator<char>());
+	    if (vs_str.size() != 0) break;
+    }
 
-	if (fs_str.size() == 0) {
-		std::cout << "Fragment shader not found \n";
-		return -1;
-	}
+    for( auto path : _paths ) {
+	    std::string fs_path = path + fs_shader;
+	    std::ifstream fs_ifstream(fs_path);
+        fs_str = std::string((std::istreambuf_iterator<char>(fs_ifstream)),
+		    std::istreambuf_iterator<char>());
+
+	    if (fs_str.size() != 0) break;
+    }
+
+    if( vs_str.size() == 0 || fs_str.size() == 0 ){
+        std::cout << "Shader not found! \n";
+        return -1;
+    }
 
 	GLint vs = glCreateShader(GL_VERTEX_SHADER);
 	GLint v_size = (GLint)strlen(vs_str.c_str());
