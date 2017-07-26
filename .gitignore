@@ -14,7 +14,6 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
 
 # Fortran module files
 *.mod
@@ -24,10 +23,8 @@
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
-*.exe
 *.out
 *.app
 
@@ -37,3 +34,4 @@ build/old_school_fps.pdb
 
 windows/vs2017/x64/*
 windows/vs2017/.vs/*
+build/old_school_fps.exe
