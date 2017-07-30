@@ -44,9 +44,9 @@ void Renderer::clear( uint32_t color ) {
 
 void Renderer::render_triangle( Triangle t ) {
 
-    float3 v1 = { t.triangle[0].pos.x, t.triangle[0].pos.y * -1.0f,  t.triangle[0].pos.z };
-    float3 v2 = { t.triangle[1].pos.x, t.triangle[1].pos.y * -1.0f,  t.triangle[1].pos.z };
-    float3 v3 = { t.triangle[2].pos.x, t.triangle[2].pos.y * -1.0f,  t.triangle[2].pos.z };
+    float3 v1 = { t.triangle[0].pos.x, 1.0f * t.triangle[0].pos.y,  t.triangle[0].pos.z };
+    float3 v2 = { t.triangle[1].pos.x, 1.0f * t.triangle[1].pos.y, t.triangle[1].pos.z };
+    float3 v3 = { t.triangle[2].pos.x, 1.0f * t.triangle[2].pos.y,  t.triangle[2].pos.z };
 
     float max_x = max( v1.x, max( v2.x, v3.x ) );
     float min_x = min( v1.x, min( v2.x, v3.x ) );
@@ -85,22 +85,23 @@ void Renderer::render_triangle( Triangle t ) {
             float w1 = orient2d( v3, v1, p );
             float w2 = orient2d( v1, v2, p );
 
-            float3 c0 = float3( 1.0f, 0.0f, 0.0f );
-            float3 c1 = float3( 0.0f, 1.0f, 0.0f );
-            float3 c2 = float3( 0.0f, 0.0f, 1.0f );
+            float3 c0 = float3( t.triangle[0].uv.x, t.triangle[0].uv.y, 0.0f );
+            float3 c1 = float3( t.triangle[1].uv.x, t.triangle[1].uv.y, 0.0f );
+            float3 c2 = float3( t.triangle[2].uv.x, t.triangle[2].uv.y, 0.0f );
 
             float3 fcolor = interpolate_floats( pos, v1, v2, v3, c0, c1, c2 );
 
             uint32_t color =
                 255 << 24 |
-                ( uint8_t ) ( fcolor.x * 255.0f ) << 16 |
+                ( uint8_t ) ( fcolor.z * 255.0f ) << 16 |
                 ( uint8_t ) ( fcolor.y * 255.0f ) << 8 |
-                ( uint8_t ) ( fcolor.z * 255.0f );
+                ( uint8_t ) ( fcolor.x * 255.0f );
 
             if( w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f ) {
                 m_color_buffer[i_m + e] = color;
+                //backface here?
             } else if( w0 <= 0.0f && w1 <= 0.0f && w2 <= 0.0f ) {
-                m_color_buffer[i_m + e] = color;
+               m_color_buffer[i_m + e] = color;
             }
 
         }

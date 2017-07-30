@@ -16,6 +16,7 @@ int main( int argc, char *argv[] ) {
     const int32_t width = 320;
     const int32_t height = 240;
     const int32_t scale = 3;
+    const float ratio_x = ( float ) height / ( float ) width;
 
     auto input = Input::get_instace();
 
@@ -25,26 +26,37 @@ int main( int argc, char *argv[] ) {
     auto window = std::make_shared<Window>();
     window->create( width, height, scale );
 
-    Vertice v0;
-    v0.pos = float3( 0.0f, 0.5f, 0.0f );
-    v0.normal = float3( 0.0f, 0.0f, 1.0f );
-    v0.uv = float2( 0.0f, 0.0f );
+    Triangle t0, t1;
 
-    Vertice v1;
-    v1.pos = float3( -0.5f, -0.5f, 0.0f );
-    v1.normal = float3( 0.0f, 0.0f, 1.0f );
-    v1.uv = float2( 0.0f, 0.0f );
+    {
+        Vertice v0;
+        v0.pos = float3( 0.5f*ratio_x, -0.5f, 0.0f );
+        v0.normal = float3( 0.0f, 0.0f, 1.0f );
+        v0.uv = float2( 0.0f, 1.0f );
 
-    Vertice v2;
-    v2.pos = float3( 0.5f, -0.5f, 0.0f );
-    v2.normal = float3( 0.0f, 0.0f, 1.0f );
-    v2.uv = float2( 0.0f, 0.0f );
+        Vertice v1;
+        v1.pos = float3( -0.5f*ratio_x, -0.5f, 0.0f );
+        v1.normal = float3( 0.0f, 0.0f, 1.0f );
+        v1.uv = float2( 0.0f, 0.0f );
 
-    Triangle t;
-    t.triangle[0] = v0;
-    t.triangle[1] = v1;
-    t.triangle[2] = v2;
+        Vertice v2;
+        v2.pos = float3( 0.5f*ratio_x, -0.5f, 0.0f );
+        v2.normal = float3( 0.0f, 0.0f, 1.0f );
+        v2.uv = float2( 1.0f, 0.0f );
 
+        Vertice v3;
+        v3.pos = float3( 0.5f*ratio_x, 0.5f, 0.0f );
+        v3.normal = float3( 0.0f, 0.0f, 1.0f );
+        v3.uv = float2( 1.0f, 1.0f );
+
+        t0.triangle[0] = v0;
+        t0.triangle[1] = v1;
+        t0.triangle[2] = v2;
+
+        t1.triangle[0] = v2;
+        t1.triangle[1] = v3;
+        t1.triangle[2] = v0;
+    }
 
     while( running ) {
         input->update();
@@ -52,7 +64,8 @@ int main( int argc, char *argv[] ) {
 
         renderer->clear( 0xff111111 );
 
-        renderer->render_triangle( t );
+        renderer->render_triangle( t0 );
+        //renderer->render_triangle( t1 );
 
         auto final_buffer = renderer->get_color_buffer();
         window->present( final_buffer );
