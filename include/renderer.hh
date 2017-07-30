@@ -5,6 +5,21 @@
 
 #include "math.hh"
 
+class Vertice{
+public:
+    float3 pos;
+    float3 normal;
+    float2 uv;
+};
+
+class Triangle{
+public:
+    Vertice triangle[3];
+    
+    // waste to have it here.
+    //float4x4 model;
+};
+
 class Renderer {
 public:
     Renderer() {};
@@ -14,7 +29,7 @@ public:
 
     void clear( uint32_t color );
 
-    void render_triangle( float3 x1, float3 x2, float3 x3 );
+    void render_triangle( Triangle t );
 
     uint32_t* get_color_buffer();
 private:

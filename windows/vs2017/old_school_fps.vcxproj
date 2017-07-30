@@ -27,6 +27,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\main.cc" />
+    <ClCompile Include="..\..\src\math.cc" />
     <ClCompile Include="..\..\src\renderer.cc" />
     <ClCompile Include="..\..\src\window.cc" />
   </ItemGroup>

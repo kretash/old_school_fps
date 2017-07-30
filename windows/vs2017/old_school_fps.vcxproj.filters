@@ -41,5 +41,8 @@
     <ClCompile Include="..\..\src\window.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\math.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

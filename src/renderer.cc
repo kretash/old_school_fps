@@ -30,7 +30,7 @@ void Renderer::create_buffers( int32_t width, int32_t height ) {
             m_color_buffer[e*width + i] = ( color );
 
 
-}
+        }
     }
 #endif
 }
@@ -42,15 +42,11 @@ void Renderer::clear( uint32_t color ) {
 
 }
 
-float orient2d( const float3 a, const float3 b, const float2 c ) {
-    return ( b.x - a.x )*( c.y - a.y ) - ( b.y - a.y )*( c.x - a.x );
-}
+void Renderer::render_triangle( Triangle t ) {
 
-void Renderer::render_triangle( float3 x1, float3 x2, float3 x3 ) {
-
-    float3 v1 = { x1.x, x1.y, x1.z };
-    float3 v2 = { x2.x, x2.y, x2.z };
-    float3 v3 = { x3.x, x3.y, x3.z };
+    float3 v1 = { t.triangle[0].pos.x, t.triangle[0].pos.y * -1.0f,  t.triangle[0].pos.z };
+    float3 v2 = { t.triangle[1].pos.x, t.triangle[1].pos.y * -1.0f,  t.triangle[1].pos.z };
+    float3 v3 = { t.triangle[2].pos.x, t.triangle[2].pos.y * -1.0f,  t.triangle[2].pos.z };
 
     float max_x = max( v1.x, max( v2.x, v3.x ) );
     float min_x = min( v1.x, min( v2.x, v3.x ) );
@@ -89,11 +85,21 @@ void Renderer::render_triangle( float3 x1, float3 x2, float3 x3 ) {
             float w1 = orient2d( v3, v1, p );
             float w2 = orient2d( v1, v2, p );
 
+            float3 c0 = float3( 1.0f, 0.0f, 0.0f );
+            float3 c1 = float3( 0.0f, 1.0f, 0.0f );
+            float3 c2 = float3( 0.0f, 0.0f, 1.0f );
+
+            float3 fcolor = interpolate_floats( pos, v1, v2, v3, c0, c1, c2 );
+
+            uint32_t color =
+                255 << 24 |
+                ( uint8_t ) ( fcolor.x * 255.0f ) << 16 |
+                ( uint8_t ) ( fcolor.y * 255.0f ) << 8 |
+                ( uint8_t ) ( fcolor.z * 255.0f );
+
             if( w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f ) {
-                unsigned int color = 0xff00ff00;
                 m_color_buffer[i_m + e] = color;
             } else if( w0 <= 0.0f && w1 <= 0.0f && w2 <= 0.0f ) {
-                unsigned int color = 0xff00ffff;
                 m_color_buffer[i_m + e] = color;
             }
 
