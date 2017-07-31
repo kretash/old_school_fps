@@ -57,4 +57,4 @@ struct float4x4 {
 
 float length( float3 vec );
 float orient2d( const float3 a, const float3 b, const float2 c );
-float3 interpolate_floats( float3 pos, float3 x1, float3 x2, float3 x3, float3 v1, float3 v2, float3 v3 );
+float3 interpolate_floats(float3 pos, float3 x1, float3 x2, float3 x3);
