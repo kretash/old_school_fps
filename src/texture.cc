@@ -11,18 +11,17 @@ void Texture::load( const char* file ) {
 
 uint32_t Texture::sample( float2 uv ) {
 
-    float scale_x = ( ( float ) x - 1.0f ) / ( float ) x;
-    float scale_y = ( ( float ) y - 1.0f ) / ( float ) y;
+    //float scale_x = ( ( float ) x - 1.0f ) / ( float ) x;
+    //float scale_y = ( ( float ) y - 1.0f ) / ( float ) y;
 
-    int32_t sx = ( int32_t ) ( uv.x * ( float ) x - 0.5f );
-    int32_t sy = ( int32_t ) ( uv.y * ( float ) y - 0.5f );
+    int32_t sx = ( int32_t ) ( uv.x * ( float ) (x-1)  );
+    int32_t sy = ( int32_t ) ( (1.0f-uv.y) * ( float ) (y-1));
 
-    sx = clamp( sx, 0, x - 1 );
-    sy = clamp( sy, 0, y - 1 );
+    sx = clamp( sx, 0, x );
+    sy = clamp( sy, 0, y );
 
-    uint32_t color = m_image_data[sy*x + sx];
-
-    //if (color == 0xff) color = 0xffffffff;
+    int32_t index = sy*x + sx;
+    uint32_t color = m_image_data[index];
 
     return color;
 }

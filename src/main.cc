@@ -14,9 +14,9 @@
 int main( int argc, char *argv[] ) {
 
     bool running = true;
-    const int32_t width = 256;
-    const int32_t height = 256;
-    const int32_t scale = 3;
+    const int32_t width = 8;
+    const int32_t height = 8;
+    const int32_t scale = 32;
     const float ratio_x = ( float ) height / ( float ) width;
 
     auto input = Input::get_instace();
@@ -28,7 +28,7 @@ int main( int argc, char *argv[] ) {
     window->create( width, height, scale );
 
     Texture checker;
-    checker.load( "../../assets/checker.png" );
+    checker.load( "../../assets/smol.png" );
 
     float time = 0.0f;
 
@@ -36,7 +36,7 @@ int main( int argc, char *argv[] ) {
         input->update();
         running = !input->quit();
 
-        renderer->clear( 0xff111111 );
+        //renderer->clear( 0xff111111 );
 
         Triangle t0, t1;
 

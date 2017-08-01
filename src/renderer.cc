@@ -8,30 +8,6 @@ void Renderer::create_buffers( int32_t width, int32_t height ) {
 
     m_color_buffer.resize( height * width );
 
-#if false
-    for( int32_t e = 0; e < height; ++e ) {
-        for( int32_t i = 0; i < width; ++i ) {
-
-            float f_i = ( float ) i;
-            float f_e = ( float ) e;
-            float f_width = ( float ) width;
-            float f_height = ( float ) height;
-
-            uint8_t r = ( uint8_t ) ( ( f_i / f_width )*255.0f );
-            uint8_t g = ( uint8_t ) ( ( f_e / f_height )*255.0f );
-            uint8_t b = ( uint8_t ) ( 0 );
-            uint8_t a = ( uint8_t ) ( 255 );
-
-            uint32_t color = a << 24 | b << 16 | g << 8 | r;
-
-            //color = 255 << 8;
-
-            m_color_buffer[e*width + i] = ( color );
-
-
-        }
-    }
-#endif
 }
 
 void Renderer::clear( uint32_t color ) {
@@ -70,10 +46,10 @@ void Renderer::render_triangle( Triangle t ) {
     v2.x = ( v2.x + 1.0f ) *m_width*0.5f;
     v2.y = ( v2.y + 1.0f ) *m_height*0.5f;
 
-    max_x = clamp( max_x, 0, m_width );
-    min_x = clamp( min_x, 0, m_width );
-    max_y = clamp( max_y, 0, m_height );
-    min_y = clamp( min_y, 0, m_height );
+    max_x = clamp( max_x, 0.0f, (float)m_width );
+    min_x = clamp( min_x, 0.0f, (float)m_width );
+    max_y = clamp( max_y, 0.0f, (float)m_height );
+    min_y = clamp( min_y, 0.0f, (float)m_height );
 
     for( int i = ( int ) min_y; i < max_y; ++i ) {
 
@@ -118,8 +94,13 @@ void Renderer::render_triangle( Triangle t ) {
 
             if (m_bind_texture != nullptr) {
                 float2 uvs = float2(fcolor.x, fcolor.y);
+
+                //uvs = float2(pos.x / (float)m_width, pos.y / (float)m_height);
+
                 color = m_bind_texture->sample( uvs );
             }
+
+            //color = 0xffffffff;
 
             if( w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f ) {
                 //backface here?

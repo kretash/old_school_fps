@@ -3,10 +3,7 @@
 #include <math.h>
 #include <algorithm>
 
-//#define abs( v ) ( (v) < 0.0f ? -(v) : (v) )
-//#define max(x, y) (((x) > (y)) ? (x) : (y))
-//#define min(x, y) (((x) < (y)) ? (x) : (y))
-#define clamp(v, i, a) ( std::min( std::max((float)v, (float)i), (float)a) )
+#define clamp(v, i, a) ( std::min( std::max(v, i), a) )
 #define mix( x, y, m ) ( x+((y-x)*m) )
 
 struct float2 {
