@@ -9,13 +9,14 @@
 #include "input.hh"
 #include "renderer.hh"
 #include "window.hh"
+#include "texture.hh"
 
 int main( int argc, char *argv[] ) {
 
     bool running = true;
-    const int32_t width = 320;
-    const int32_t height = 240;
-    const int32_t scale = 3;
+    const int32_t width = 256;
+    const int32_t height = 256;
+    const int32_t scale = 1;
     const float ratio_x = ( float ) height / ( float ) width;
 
     auto input = Input::get_instace();
@@ -25,6 +26,9 @@ int main( int argc, char *argv[] ) {
 
     auto window = std::make_shared<Window>();
     window->create( width, height, scale );
+
+    Texture checker;
+    checker.load("../../assets/checker.png");
 
     Triangle t0, t1;
 
@@ -43,12 +47,12 @@ int main( int argc, char *argv[] ) {
         Vertice v1;
         v1.pos = float3( s_x, l_y, 0.0f );
         v1.normal = float3( 0.0f, 0.0f, 0.0f );
-        v1.uv = float2( 0.0f, 0.0f );
+        v1.uv = float2( 0.0f, 1.0f );
 
         Vertice v2;
         v2.pos = float3( l_x, s_y, 0.0f );
         v2.normal = float3(0.0f, 0.0f, 0.0f);
-        v2.uv = float2( 0.0f, 0.0f );
+        v2.uv = float2( 1.0f, 0.0f );
 
         Vertice v3;
         v3.pos = float3( l_x, l_y, 0.0f );
@@ -70,6 +74,7 @@ int main( int argc, char *argv[] ) {
 
         renderer->clear( 0xff111111 );
 
+        renderer->bind(&checker);
         renderer->render_triangle( t0 );
         renderer->render_triangle( t1 );
 

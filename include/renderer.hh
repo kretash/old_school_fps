@@ -5,6 +5,8 @@
 
 #include "math.hh"
 
+class Texture;
+
 class Vertice{
 public:
     float3 pos;
@@ -27,6 +29,8 @@ public:
 
     void create_buffers( int32_t width, int32_t height );
 
+    void bind(Texture* t);
+
     void clear( uint32_t color );
 
     void render_triangle( Triangle t );
@@ -35,5 +39,6 @@ public:
 private:
     int32_t m_width;
     int32_t m_height;
+    Texture* m_bind_texture = nullptr;
     std::vector<uint32_t> m_color_buffer;
 };

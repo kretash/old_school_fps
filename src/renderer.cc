@@ -1,6 +1,5 @@
 #include "renderer.hh"
-#include <math.h>
-#include <algorithm>
+#include "texture.hh"
 
 void Renderer::create_buffers( int32_t width, int32_t height ) {
 
@@ -42,16 +41,20 @@ void Renderer::clear( uint32_t color ) {
 
 }
 
+void Renderer::bind(Texture* t) {
+    m_bind_texture = t;
+}
+
 void Renderer::render_triangle( Triangle t ) {
 
     float3 v0 = { t.triangle[0].pos.x, -1.0f * t.triangle[0].pos.y, t.triangle[0].pos.z };
     float3 v1 = { t.triangle[1].pos.x, -1.0f * t.triangle[1].pos.y, t.triangle[1].pos.z };
     float3 v2 = { t.triangle[2].pos.x, -1.0f * t.triangle[2].pos.y, t.triangle[2].pos.z };
 
-    float max_x = max( v0.x, max( v1.x, v2.x ) );
-    float min_x = min( v0.x, min( v1.x, v2.x ) );
-    float max_y = max( v0.y, max( v1.y, v2.y ) );
-    float min_y = min( v0.y, min( v1.y, v2.y ) );
+    float max_x = std::max( v0.x, std::max( v1.x, v2.x ) );
+    float min_x = std::min( v0.x, std::min( v1.x, v2.x ) );
+    float max_y = std::max( v0.y, std::max( v1.y, v2.y ) );
+    float min_y = std::min( v0.y, std::min( v1.y, v2.y ) );
 
     max_x = ( max_x + 1.0f ) * m_width / 2.0f;
     min_x = ( min_x + 1.0f ) * m_width / 2.0f;
@@ -85,23 +88,41 @@ void Renderer::render_triangle( Triangle t ) {
             float w1 = orient2d( v2, v0, p );
             float w2 = orient2d( v0, v1, p );
 
-            float3 c0 = float3( t.triangle[0].normal );
-            float3 c1 = float3( t.triangle[1].normal );
-            float3 c2 = float3( t.triangle[2].normal );
+            float3 c0 = float3(t.triangle[0].uv, 0.0f);
+            float3 c1 = float3(t.triangle[1].uv, 0.0f);
+            float3 c2 = float3(t.triangle[2].uv, 0.0f);
 
             float3 inter = interpolate_floats( pos, v0, v1, v2 );
 
             float3 fcolor = inter.x * c0 + inter.y * c1 + inter.z * c2;
 
-            uint32_t color =
-                255 << 24 |
-                ( uint8_t ) (fcolor.z * 255.0f ) << 16 |
-                ( uint8_t ) (fcolor.y * 255.0f ) << 8 |
-                ( uint8_t ) (fcolor.x * 255.0f );
+            //fcolor.x = clamp(fcolor.x, 0.0f, 1.0f);
+            //fcolor.y = clamp(fcolor.y, 0.0f, 1.0f);
+            //fcolor.z = clamp(fcolor.z, 0.0f, 1.0f);
+
+            //if (fcolor.x<0.0f || fcolor.x > 1.01f) {
+            //    __debugbreak();
+            //}
+            //if (fcolor.y<0.0f || fcolor.y > 1.4f) {
+            //    __debugbreak();
+            //}
+            //if (fcolor.z<0.0f || fcolor.z > 1.01f) {
+            //    __debugbreak();
+            //}
+
+            fcolor.x = isnan(fcolor.x) ? 0 : fcolor.x;
+            fcolor.y = isnan(fcolor.y) ? 0 : fcolor.y;
+            fcolor.z = isnan(fcolor.z) ? 0 : fcolor.z;
+
+            uint32_t color = 0;
+
+            if (m_bind_texture != nullptr) {
+                float2 uvs = float2(fcolor.x, fcolor.y);
+                color = m_bind_texture->sample( uvs );
+            }
 
             if( w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f ) {
                 //backface here?
-                m_color_buffer[i_m + e] = 0xffffffff;
                 m_color_buffer[i_m + e] = color;
             } else if( w0 <= 0.0f && w1 <= 0.0f && w2 <= 0.0f ) {
                m_color_buffer[i_m + e] = color;
