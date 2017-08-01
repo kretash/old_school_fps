@@ -11,11 +11,19 @@ void Texture::load( const char* file ) {
 
 uint32_t Texture::sample( float2 uv ) {
 
-    //float scale_x = ( ( float ) x - 1.0f ) / ( float ) x;
-    //float scale_y = ( ( float ) y - 1.0f ) / ( float ) y;
+    float fx = ( float ) x;
+    float fy = ( float ) y;
 
-    int32_t sx = ( int32_t ) ( uv.x * ( float ) (x-1)  );
-    int32_t sy = ( int32_t ) ( (1.0f-uv.y) * ( float ) (y-1));
+    float2 tuv = uv;
+
+    // vertical flip.
+    tuv.y = ( 1.0f - tuv.y );
+
+    tuv.x = tuv.x + ( 1.0f / fx )*0.5f;
+    tuv.y = tuv.y + ( 1.0f / fy )*0.5f;
+
+    int32_t sx = ( int32_t ) ( tuv.x * fx );
+    int32_t sy = ( int32_t ) ( tuv.y * fy );
 
     sx = clamp( sx, 0, x );
     sy = clamp( sy, 0, y );

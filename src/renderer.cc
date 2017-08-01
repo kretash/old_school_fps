@@ -21,11 +21,46 @@ void Renderer::bind(Texture* t) {
     m_bind_texture = t;
 }
 
-void Renderer::render_triangle( Triangle t ) {
+void Renderer::bind_mvp( float4x4 mvp ) {
+    m_uniforms.mvp = mvp;
+}
 
-    float3 v0 = { t.triangle[0].pos.x, -1.0f * t.triangle[0].pos.y, t.triangle[0].pos.z };
-    float3 v1 = { t.triangle[1].pos.x, -1.0f * t.triangle[1].pos.y, t.triangle[1].pos.z };
-    float3 v2 = { t.triangle[2].pos.x, -1.0f * t.triangle[2].pos.y, t.triangle[2].pos.z };
+VertexToFragment Renderer::vertex_shader( VertexInput i, Uniforms u ){
+    VertexToFragment out;
+
+    out.pos = u.mvp * float4(i.pos, 1.0f);
+
+    return out;
+}
+
+FragmentOutput Renderer::fragment_shader( VertexToFragment i, Uniforms u ){
+    FragmentOutput out;
+
+    return out;
+}
+
+void Renderer::render_triangle( Triangle t ) {
+    
+    VertexToFragment vtf[3];
+
+    for( int32_t i = 0; i < 3; ++i ){
+        VertexInput input;
+
+        input.pos = t.triangle[i].pos;
+        input.normal = t.triangle[i].normal;
+        input.uv = t.triangle[i].uv;
+
+        vtf[i] = vertex_shader( input, m_uniforms );
+
+        vtf[i].pos.x /= vtf[i].pos.w;
+        vtf[i].pos.y /= vtf[i].pos.w;
+        vtf[i].pos.z /= vtf[i].pos.w;
+        vtf[i].pos.w = 1.0f;
+    }
+
+    float3 v0 = { vtf[0].pos.x, -1.0f * vtf[0].pos.y, vtf[0].pos.z };
+    float3 v1 = { vtf[1].pos.x, -1.0f * vtf[1].pos.y, vtf[1].pos.z };
+    float3 v2 = { vtf[2].pos.x, -1.0f * vtf[2].pos.y, vtf[2].pos.z };
 
     float max_x = std::max( v0.x, std::max( v1.x, v2.x ) );
     float min_x = std::min( v0.x, std::min( v1.x, v2.x ) );
@@ -72,20 +107,6 @@ void Renderer::render_triangle( Triangle t ) {
 
             float3 fcolor = inter.x * c0 + inter.y * c1 + inter.z * c2;
 
-            //fcolor.x = clamp(fcolor.x, 0.0f, 1.0f);
-            //fcolor.y = clamp(fcolor.y, 0.0f, 1.0f);
-            //fcolor.z = clamp(fcolor.z, 0.0f, 1.0f);
-
-            //if (fcolor.x<0.0f || fcolor.x > 1.01f) {
-            //    __debugbreak();
-            //}
-            //if (fcolor.y<0.0f || fcolor.y > 1.4f) {
-            //    __debugbreak();
-            //}
-            //if (fcolor.z<0.0f || fcolor.z > 1.01f) {
-            //    __debugbreak();
-            //}
-
             fcolor.x = isnan(fcolor.x) ? 0 : fcolor.x;
             fcolor.y = isnan(fcolor.y) ? 0 : fcolor.y;
             fcolor.z = isnan(fcolor.z) ? 0 : fcolor.z;
@@ -94,13 +115,8 @@ void Renderer::render_triangle( Triangle t ) {
 
             if (m_bind_texture != nullptr) {
                 float2 uvs = float2(fcolor.x, fcolor.y);
-
-                //uvs = float2(pos.x / (float)m_width, pos.y / (float)m_height);
-
                 color = m_bind_texture->sample( uvs );
             }
-
-            //color = 0xffffffff;
 
             if( w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f ) {
                 //backface here?

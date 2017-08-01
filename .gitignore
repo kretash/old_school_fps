@@ -35,3 +35,5 @@ build/old_school_fps.pdb
 windows/vs2017/x64/*
 windows/vs2017/.vs/*
 build/old_school_fps.exe
+build/old_school_fps.iobj
+build/old_school_fps.ipdb
