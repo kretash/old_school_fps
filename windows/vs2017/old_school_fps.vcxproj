@@ -23,12 +23,14 @@
     <ClInclude Include="..\..\include\input.hh" />
     <ClInclude Include="..\..\include\math.hh" />
     <ClInclude Include="..\..\include\renderer.hh" />
+    <ClInclude Include="..\..\include\texture.hh" />
     <ClInclude Include="..\..\include\window.hh" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\main.cc" />
     <ClCompile Include="..\..\src\math.cc" />
     <ClCompile Include="..\..\src\renderer.cc" />
+    <ClCompile Include="..\..\src\texture.cc" />
     <ClCompile Include="..\..\src\window.cc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
