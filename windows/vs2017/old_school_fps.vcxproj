@@ -19,13 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\camera.hh" />
     <ClInclude Include="..\..\include\gl_helper.hh" />
     <ClInclude Include="..\..\include\input.hh" />
     <ClInclude Include="..\..\include\math.hh" />
     <ClInclude Include="..\..\include\renderer.hh" />
     <ClInclude Include="..\..\include\texture.hh" />
     <ClInclude Include="..\..\include\window.hh" />
-    <ClInclude Include="..\..\src\main.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\main.cc" />

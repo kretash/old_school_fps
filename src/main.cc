@@ -14,6 +14,7 @@
 #include "renderer.hh"
 #include "window.hh"
 #include "texture.hh"
+#include "camera.hh"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "external/tiny_obj_loader.h"
@@ -21,8 +22,8 @@
 int main( int argc, char *argv[] ) {
 
     bool running = true;
-    const int32_t width = 512;
-    const int32_t height = 256;
+    const int32_t width = 1280;
+    const int32_t height = 720;
     const int32_t scale = 1;
     const float ratio_x = ( float ) height / ( float ) width;
 
@@ -35,19 +36,13 @@ int main( int argc, char *argv[] ) {
     window->create( width, height, scale );
 
     Texture checker;
-    checker.load( "../../assets/checker.png" );
+    checker.load( "../../assets/texture/checker.png" );
 
-    float4x4 model_mat;
-
-    float4x4 view_mat = float4x4(1.0f);
-    float3 camera_position = float3( 0.0f, 0.0f, -7.5f );
-
-    float4x4 proj_mat = float4x4( 1.0f );
-    proj_mat.prespective( 75.0f, ( float ) width / ( float ) height, 0.1f, 100.0f );
+    Camera camera(width, height);
 
     // ############################### load OBJ 
 
-    std::string inputfile = "../../assets/sphere.obj";
+    std::string inputfile = "../../assets/geometry/lucy.obj";
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
@@ -120,16 +115,18 @@ int main( int argc, char *argv[] ) {
 
         auto start = std::chrono::high_resolution_clock::now();
 
-        model_mat.identity();
+        camera.update();
+
+        float4x4 model_mat(1.0f);
         model_mat.rotate_y(time* 0.25f);
 
-        view_mat.translate( camera_position.x, camera_position.y, camera_position.z );
-
-        renderer->clear( 0xff111111 );
-
+        float4x4 view_mat = camera.get_view();
+        float4x4 proj_mat = camera.get_proj();
         float4x4 model_view_mat = view_mat * model_mat;
         float4x4 mvp = proj_mat * model_view_mat;
         
+        renderer->clear( 0xff111111 );
+
         renderer->bind_texture( 0, &checker );
         renderer->bind_float4x4(0, &mvp );
 
@@ -146,7 +143,8 @@ int main( int argc, char *argv[] ) {
         std::cout << "Frame time: " << ms.count() << "ms\n";
 
         window->present( final_buffer );
-        time += 0.016f;
+        float frame_time = (float)ms.count() / 1000.0f;
+        time += frame_time;
     }
 
     return 0;

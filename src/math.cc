@@ -173,7 +173,7 @@ void float4x4::rotate_y( float a ) {
     m[10] = cosf( a );
 }
 
-void float4x4::prespective( float fov, float aspect_ratio, float n, float f ) {
+void float4x4::perspective( float fov, float aspect_ratio, float n, float f ) {
     float tan_fov = tanf( fov / 2.0f );
     this->identity();
     m[0] = 1.0f / ( aspect_ratio*tan_fov );
@@ -181,4 +181,30 @@ void float4x4::prespective( float fov, float aspect_ratio, float n, float f ) {
     m[10] = -( f + n ) / ( f - n );
     m[11] = -1.0f;
     m[14] = -( 2.0f * f * n ) / ( f - n );
+}
+
+void float4x4::look_at( float3 eye, float3 focus, float3 up ) {
+    this->identity();
+
+    float3 z_axis = normal( focus - eye );
+    float3 x_axis = normal( cross( up, z_axis ) );
+    float3 y_axis = cross( z_axis, x_axis );
+
+    m[0] = x_axis.x;
+    m[1] = y_axis.x;
+    m[2] = z_axis.x;
+    m[3] = 0;
+    m[4] = x_axis.y;
+    m[5] = y_axis.y;
+    m[6] = z_axis.y;
+    m[7] = 0;
+    m[8] = x_axis.z;
+    m[9] = y_axis.z;
+    m[10] = z_axis.z;
+    m[11] = 0;
+
+    m[12] = -dot( x_axis, eye );
+    m[13] = -dot( y_axis, eye );
+    m[14] = -dot( z_axis, eye );
+    m[15] = 1;
 }

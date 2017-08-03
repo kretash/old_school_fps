@@ -98,7 +98,8 @@ struct float4x4 {
 
     void translate( float x, float y, float z );
     void rotate_y( float a );
-    void prespective( float fov, float aspect_ratio, float n, float f );
+    void perspective( float fov, float aspect_ratio, float n, float f );
+    void float4x4::look_at( float3 eye, float3 direction, float3 up );
 };
 
 float4 operator*( const float4x4& lhs, const float4& rhs );

@@ -105,18 +105,18 @@ void Renderer::render_triangle(Triangle t) {
         vtf[i].pos.w = 1.0f;
     }
 
-    float3 v0 = { vtf[0].pos.x, -1.0f * vtf[0].pos.y, vtf[0].pos.z };
-    float3 v1 = { vtf[1].pos.x, -1.0f * vtf[1].pos.y, vtf[1].pos.z };
-    float3 v2 = { vtf[2].pos.x, -1.0f * vtf[2].pos.y, vtf[2].pos.z };
+    float3 v0 = { vtf[0].pos.x, vtf[0].pos.y, vtf[0].pos.z };
+    float3 v1 = { vtf[1].pos.x, vtf[1].pos.y, vtf[1].pos.z };
+    float3 v2 = { vtf[2].pos.x, vtf[2].pos.y, vtf[2].pos.z };
 
-    v0.x = (v0.x + 1.0f) *m_f_half_width;
-    v0.y = (v0.y + 1.0f) *m_f_half_height;
+    v0.x = (v0.x + 0.0f) *m_f_half_width;
+    v0.y = (v0.y + 0.0f) *m_f_half_height;
 
-    v1.x = (v1.x + 1.0f) *m_f_half_width;
-    v1.y = (v1.y + 1.0f) *m_f_half_height;
+    v1.x = (v1.x + 0.0f) *m_f_half_width;
+    v1.y = (v1.y + 0.0f) *m_f_half_height;
 
-    v2.x = (v2.x + 1.0f) *m_f_half_width;
-    v2.y = (v2.y + 1.0f) *m_f_half_height;
+    v2.x = (v2.x + 0.0f) *m_f_half_width;
+    v2.y = (v2.y + 0.0f) *m_f_half_height;
 
     float min_x = std::min(v0.x, std::min(v1.x, v2.x));
     float max_x = std::max(v0.x, std::max(v1.x, v2.x));
@@ -160,7 +160,9 @@ void Renderer::render_triangle(Triangle t) {
             }
             else 
             */
-            if (w0 <= 0.0f && w1 <= 0.0f && w2 <= 0.0f) {
+            const float thres = 256.0f;
+            
+            if (w0 <= thres && w1 <= thres && w2 <= thres ) {
                 uint32_t color = _execute_fragment_shader(vtf, pos, v0, v1, v2);
 
                 int32_t index = i_m + (int32_t)e;

@@ -33,7 +33,7 @@
     <ClInclude Include="..\..\include\texture.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\main.h">
+    <ClInclude Include="..\..\include\camera.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
