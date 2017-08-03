@@ -1,5 +1,9 @@
 #include "math.hh"
 
+float2 operator*(const float& lhs, const float2& rhs) {
+    return float2(rhs.x * lhs, rhs.y * lhs);
+}
+
 float3 operator*( const float& lhs, const float3& rhs ) {
     return float3( rhs.x * lhs, rhs.y * lhs, rhs.z  * lhs );
 }
@@ -16,6 +20,36 @@ inline float float3::length() {
 
 float orient2d( const float3 a, const float3 b, const float2 c ) {
     return ( b.x - a.x )*( c.y - a.y ) - ( b.y - a.y )*( c.x - a.x );
+}
+
+float3 half(float3 a, float3 b) {
+    float3 sum = a + b;
+    sum.normalize();
+    return sum;
+}
+
+float3 normal(const float3 f) {
+    float3 normal = f;
+    float m = f.x * f.x + f.y * f.y + f.z * f.z;
+    if (m == 0.0f) return f;
+    m = 1.0f / sqrtf(m);
+    normal.x *= m;
+    normal.y *= m;
+    normal.z *= m;
+    return normal;
+}
+
+float dot(const float3 d, const float3 f) {
+    float dot = d.x * f.x + d.y * f.y + d.z * f.z;
+    return dot;
+}
+
+float3 cross(const float3 d, const float3 f) {
+    float3 r;
+    r.x = d.y * f.z - d.z * f.y;
+    r.y = d.z * f.x - d.x * f.z;
+    r.z = d.x * f.y - d.y * f.x;
+    return r;
 }
 
 float3 interpolate_floats( float3 pos, float3 x1, float3 x2, float3 x3 ) {
@@ -51,6 +85,22 @@ float3 interpolate_floats( float3 pos, float3 x1, float3 x2, float3 x3 ) {
 
     return float3( x_area / a_area, y_area / a_area, z_area / a_area );
 
+}
+
+void float4::normalize() {
+    float m = sqrtf(x * x + y * y + z * z + w * w);
+    x /= m;    y /= m;    z /= m;   w /= m;
+}
+
+void float4::clamp(float min, float max) {
+    x = def_clamp(x, min, max);
+    y = def_clamp(y, min, max);
+    z = def_clamp(z, min, max);
+    w = def_clamp(w, min, max);
+}
+
+float4 operator*(const float& lhs, const float4& rhs) {
+    return float4(rhs.x * lhs, rhs.y * lhs, rhs.z  * lhs, rhs.w  * lhs);
 }
 
 float4x4 mult( const float4x4& l, const float4x4& r ) {
@@ -89,7 +139,6 @@ float4 mult_v( const float4x4& m, const float4& v ) {
 
     return float4( r[0], r[1], r[2], r[3] );
 }
-
 
 float4 operator*( const float4x4& lhs, const float4& rhs ) {
     return mult_v( lhs, rhs );

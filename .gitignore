@@ -5,7 +5,6 @@
 *.slo
 *.lo
 *.o
-*.obj
 
 # Precompiled Headers
 *.gch
@@ -32,8 +31,14 @@
 build/old_school_fps.ilk
 build/old_school_fps.pdb
 
+*sdf
+*suo
+*db
+
 windows/vs2017/x64/*
 windows/vs2017/.vs/*
+windows/vs2015/.vs/*
+windows/vs2015/x64/*
 build/old_school_fps.exe
 build/old_school_fps.iobj
 build/old_school_fps.ipdb

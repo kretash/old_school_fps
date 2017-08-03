@@ -7,6 +7,8 @@
 //
 
 #include <iostream>
+#include <chrono>
+#include <ctime>
 
 #include "input.hh"
 #include "renderer.hh"
@@ -45,7 +47,7 @@ int main( int argc, char *argv[] ) {
 
     // ############################### load OBJ 
 
-    std::string inputfile = "../../assets/cube.obj";
+    std::string inputfile = "../../assets/sphere.obj";
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
@@ -78,12 +80,16 @@ int main( int argc, char *argv[] ) {
                 vertice.pos.y = attrib.vertices[3 * idx.vertex_index + 1];
                 vertice.pos.z = attrib.vertices[3 * idx.vertex_index + 2];
 
-                vertice.normal.x = attrib.normals[3 * idx.normal_index + 0];
-                vertice.normal.y = attrib.normals[3 * idx.normal_index + 1];
-                vertice.normal.z = attrib.normals[3 * idx.normal_index + 2];
+                if (idx.normal_index != -1) {
+                    vertice.normal.x = attrib.normals[3 * idx.normal_index + 0];
+                    vertice.normal.y = attrib.normals[3 * idx.normal_index + 1];
+                    vertice.normal.z = attrib.normals[3 * idx.normal_index + 2];
+                }
 
-                vertice.uv.x = attrib.texcoords[2 * idx.texcoord_index + 0];
-                vertice.uv.y = attrib.texcoords[2 * idx.texcoord_index + 1];
+                if (idx.texcoord_index != -1) {
+                    vertice.uv.x = attrib.texcoords[2 * idx.texcoord_index + 0];
+                    vertice.uv.y = attrib.texcoords[2 * idx.texcoord_index + 1];
+                }
 
                 vertices.push_back( vertice );
 
@@ -112,8 +118,10 @@ int main( int argc, char *argv[] ) {
         input->update();
         running = !input->quit();
 
+        auto start = std::chrono::high_resolution_clock::now();
+
         model_mat.identity();
-        model_mat.rotate_y(time* 0.1f);
+        model_mat.rotate_y(time* 0.25f);
 
         view_mat.translate( camera_position.x, camera_position.y, camera_position.z );
 
@@ -122,8 +130,8 @@ int main( int argc, char *argv[] ) {
         float4x4 model_view_mat = view_mat * model_mat;
         float4x4 mvp = proj_mat * model_view_mat;
         
-        renderer->bind( &checker );
-        renderer->bind_mvp( mvp );
+        renderer->bind_texture( 0, &checker );
+        renderer->bind_float4x4(0, &mvp );
 
         for( size_t i = 0; i < triangles.size(); ++i )
         {
@@ -131,6 +139,12 @@ int main( int argc, char *argv[] ) {
         }
 
         auto final_buffer = renderer->get_color_buffer();
+
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> diff = end - start;
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+        std::cout << "Frame time: " << ms.count() << "ms\n";
+
         window->present( final_buffer );
         time += 0.016f;
     }

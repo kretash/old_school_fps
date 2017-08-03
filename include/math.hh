@@ -3,14 +3,24 @@
 #include <math.h>
 #include <algorithm>
 
-#define clamp(v, i, a) ( std::min( std::max(v, i), a) )
-#define mix( x, y, m ) ( x+((y-x)*m) )
+#define def_clamp(v, i, a) ( std::min( std::max(v, i), a) )
+#define def_mix( x, y, m ) ( x+((y-x)*m) )
 
 struct float2 {
     float2() {}
     float2( float x, float y ) : x( x ), y( y ) {}
     float x = 0.0f, y = 0.0f;
+
+    float2 operator+(const float2& o) {
+        return float2(this->x + o.x, this->y + o.y);
+    }
+
+    float2 operator*(const float& o) {
+        return float2(this->x * o, this->y * o);
+    }
 };
+
+float2 operator*(const float& lhs, const float2& rhs);
 
 struct float3 {
     float x = 0.0f, y = 0.0f, z = 0.0f;
@@ -50,8 +60,26 @@ struct float4 {
     float4() {}
     float4( float x, float y, float z, float w ) : x( x ), y( y ), z( z ), w( w ) {}
     float4( float3 v, float w ) : x( v.x ), y( v.y ), z( v.z ), w( w ) {}
+    float4(float2 v, float z, float w) : x(v.x), y(v.y), z(z), w(w) {}
     float x = 0.0f, y = 0.0f, z = 0.0f, w = 0.0f;
+
+    void normalize();
+    void clamp(float min, float max);
+
+    float4 operator+(const float4& o) {
+        return float4(this->x + o.x, this->y + o.y, this->z + o.z, this->w + o.w);
+    }
+
+    float4 operator/(const float& o) {
+        return float4(this->x / o, this->y / o, this->z / o, this->w / o);
+    }
+
+    float4 operator*(const float& o) {
+        return float4(this->x * o, this->y * o, this->z  * o, this->w  * o);
+    }
 };
+
+float4 operator*(const float& lhs, const float4& rhs);
 
 struct float4x4 {
     float m[16] = 
@@ -77,4 +105,8 @@ float4 operator*( const float4x4& lhs, const float4& rhs );
 float4x4 operator*( const float4x4& lhs, const float4x4& rhs );
 
 float orient2d( const float3 a, const float3 b, const float2 c );
-float3 interpolate_floats( float3 pos, float3 x1, float3 x2, float3 x3 );
+float3 interpolate_floats(float3 pos, float3 x1, float3 x2, float3 x3); 
+float3 half(float3 a, float3 b);
+float3 normal(const float3 f);
+float dot(const float3 d, const float3 f);
+float3 cross(const float3 d, const float3 f);

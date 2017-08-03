@@ -1,56 +1,103 @@
 #include "renderer.hh"
 #include "texture.hh"
 
-void Renderer::create_buffers( int32_t width, int32_t height ) {
+#include <algorithm>
+
+void Renderer::create_buffers(int32_t width, int32_t height) {
 
     m_width = width;
     m_height = height;
+    m_half_width = width / 2;
+    m_half_height = height / 2;
 
-    m_color_buffer.resize( height * width );
+    m_f_width = (float)width;
+    m_f_height = (float)height;
+    m_f_half_width = (float)m_half_width;
+    m_f_half_height = (float)m_half_height;
+
+    m_color_buffer.resize(height * width);
 
 }
 
-void Renderer::clear( uint32_t color ) {
+void Renderer::clear(uint32_t color) {
 
-    for( size_t i = 0; i < m_color_buffer.size(); ++i )
+    for (size_t i = 0; i < m_color_buffer.size(); ++i)
         m_color_buffer[i] = color;
 
 }
 
-void Renderer::bind(Texture* t) {
-    m_bind_texture = t;
+void Renderer::bind_texture(int32_t id, Texture* texture) {
+    m_uniforms.texture[id] = texture;
 }
 
-void Renderer::bind_mvp( float4x4 mvp ) {
-    m_uniforms.mvp = mvp;
+void Renderer::bind_float4x4(int32_t id, float4x4* matrix) {
+    m_uniforms.matrix[id] = matrix;
 }
 
-VertexToFragment Renderer::vertex_shader( VertexInput i, Uniforms u ){
+VertexToFragment Renderer::vertex_shader(VertexInput i, Uniforms u) {
     VertexToFragment out;
 
-    out.pos = u.mvp * float4(i.pos, 1.0f);
+    const int32_t id = 0;
+    float4x4 mvp = *m_uniforms.matrix[id];
+
+    out.pos = mvp * float4(i.pos, 1.0f);
+    float4 world_normal = mvp * float4(i.normal, 0.0f);
+    out.normal = float3(world_normal.x, world_normal.y, world_normal.z);
+    out.normal.normalize();
+    out.uv = i.uv;
 
     return out;
 }
 
-FragmentOutput Renderer::fragment_shader( VertexToFragment i, Uniforms u ){
+FragmentOutput Renderer::fragment_shader(VertexToFragment i, Uniforms u) {
     FragmentOutput out;
 
+    const int32_t id = 0;
+    Texture* texture = m_uniforms.texture[id];
+
+    float4 color = float4(1.0f, 0.66f, 0.66f, 1.0f);
+
+    out.frag_color = color * dot( i.normal, float3( 0.5f, 0.0f, -0.5f));
+    //out.frag_color = float4(i.uv, 0.0f, 1.0f);
+    //out.frag_color = texture->sample(i.uv);
+
     return out;
 }
 
-void Renderer::render_triangle( Triangle t ) {
-    
+uint32_t Renderer::_execute_fragment_shader(VertexToFragment vtf[3], float3 pos, float3 v0, float3 v1, float3 v2) {
+
+    float3 inter = interpolate_floats(pos, v0, v1, v2);
+
+    VertexToFragment vtf_interpolated;
+    vtf_interpolated.pos = inter.x * vtf[0].pos + inter.y * vtf[1].pos + inter.z * vtf[2].pos;
+    vtf_interpolated.normal = inter.x * vtf[0].normal + inter.y * vtf[1].normal + inter.z * vtf[2].normal;
+    vtf_interpolated.uv = inter.x * vtf[0].uv + inter.y * vtf[1].uv + inter.z * vtf[2].uv;
+
+    FragmentOutput output = fragment_shader(vtf_interpolated, m_uniforms);
+
+    output.frag_color.clamp(0.0f, 1.0f);
+
+    uint32_t color =
+        (uint8_t)(output.frag_color.w * 255.0f) << 24 |
+        (uint8_t)(output.frag_color.z * 255.0f) << 16 |
+        (uint8_t)(output.frag_color.y * 255.0f) << 8 |
+        (uint8_t)(output.frag_color.x * 255.0f);
+
+    return color;
+}
+
+void Renderer::render_triangle(Triangle t) {
+
     VertexToFragment vtf[3];
 
-    for( int32_t i = 0; i < 3; ++i ){
+    for (int32_t i = 0; i < 3; ++i) {
         VertexInput input;
 
         input.pos = t.triangle[i].pos;
         input.normal = t.triangle[i].normal;
         input.uv = t.triangle[i].uv;
 
-        vtf[i] = vertex_shader( input, m_uniforms );
+        vtf[i] = vertex_shader(input, m_uniforms);
 
         vtf[i].pos.x /= vtf[i].pos.w;
         vtf[i].pos.y /= vtf[i].pos.w;
@@ -62,71 +109,67 @@ void Renderer::render_triangle( Triangle t ) {
     float3 v1 = { vtf[1].pos.x, -1.0f * vtf[1].pos.y, vtf[1].pos.z };
     float3 v2 = { vtf[2].pos.x, -1.0f * vtf[2].pos.y, vtf[2].pos.z };
 
-    float max_x = std::max( v0.x, std::max( v1.x, v2.x ) );
-    float min_x = std::min( v0.x, std::min( v1.x, v2.x ) );
-    float max_y = std::max( v0.y, std::max( v1.y, v2.y ) );
-    float min_y = std::min( v0.y, std::min( v1.y, v2.y ) );
+    v0.x = (v0.x + 1.0f) *m_f_half_width;
+    v0.y = (v0.y + 1.0f) *m_f_half_height;
 
-    max_x = ( max_x + 1.0f ) * m_width / 2.0f;
-    min_x = ( min_x + 1.0f ) * m_width / 2.0f;
-    max_y = ( max_y + 1.0f ) * m_height / 2.0f;
-    min_y = ( min_y + 1.0f ) * m_height / 2.0f;
+    v1.x = (v1.x + 1.0f) *m_f_half_width;
+    v1.y = (v1.y + 1.0f) *m_f_half_height;
 
-    v0.x = ( v0.x + 1.0f ) *m_width*0.5f;
-    v0.y = ( v0.y + 1.0f ) *m_height*0.5f;
+    v2.x = (v2.x + 1.0f) *m_f_half_width;
+    v2.y = (v2.y + 1.0f) *m_f_half_height;
 
-    v1.x = ( v1.x + 1.0f ) *m_width*0.5f;
-    v1.y = ( v1.y + 1.0f ) *m_height*0.5f;
+    float min_x = std::min(v0.x, std::min(v1.x, v2.x));
+    float max_x = std::max(v0.x, std::max(v1.x, v2.x));
+    float min_y = std::min(v0.y, std::min(v1.y, v2.y));
+    float max_y = std::max(v0.y, std::max(v1.y, v2.y));
+    
+    max_x = def_clamp(max_x, 0.0f, m_f_width);
+    min_x = def_clamp(min_x, 0.0f, m_f_width);
+    max_y = def_clamp(max_y, 0.0f, m_f_height);
+    min_y = def_clamp(min_y, 0.0f, m_f_height);
 
-    v2.x = ( v2.x + 1.0f ) *m_width*0.5f;
-    v2.y = ( v2.y + 1.0f ) *m_height*0.5f;
+    int32_t i_m = (int32_t)min_y * m_width;
 
-    max_x = clamp( max_x, 0.0f, (float)m_width );
-    min_x = clamp( min_x, 0.0f, (float)m_width );
-    max_y = clamp( max_y, 0.0f, (float)m_height );
-    min_y = clamp( min_y, 0.0f, (float)m_height );
+    float2 p = { min_x, min_y };
+    float3 pos = { min_x, min_y, 0.0f };
+    float w0 = 0.0f, w1 = 0.0f, w2 = 0.0f;
 
-    for( int i = ( int ) min_y; i < max_y; ++i ) {
+    // from 33sm to 25ms
+    // All floats now
+    // convert all to int32_t
+    for (float i = min_y; i < max_y; ++i) {
+        
+        p.y = i;
+        pos.y = i;
 
-        int i_m = i*m_width;
+        for (float e = min_x; e < max_x; ++e) {
 
-        for( int e = ( int ) min_x; e < max_x; ++e ) {
+            p.x = e;
+            pos.x = e;
+            
+            w0 = orient2d(v1, v2, p);
+            w1 = orient2d(v2, v0, p);
+            w2 = orient2d(v0, v1, p);
 
-            float2 p = { ( float ) e, ( float ) ( i ) };
-            float3 pos = { ( float ) e, ( float ) i, 0.0f };
-
-            float w0 = orient2d( v1, v2, p );
-            float w1 = orient2d( v2, v0, p );
-            float w2 = orient2d( v0, v1, p );
-
-            float3 c0 = float3(t.triangle[0].uv, 0.0f);
-            float3 c1 = float3(t.triangle[1].uv, 0.0f);
-            float3 c2 = float3(t.triangle[2].uv, 0.0f);
-
-            float3 inter = interpolate_floats( pos, v0, v1, v2 );
-
-            float3 fcolor = inter.x * c0 + inter.y * c1 + inter.z * c2;
-
-            fcolor.x = isnan(fcolor.x) ? 0 : fcolor.x;
-            fcolor.y = isnan(fcolor.y) ? 0 : fcolor.y;
-            fcolor.z = isnan(fcolor.z) ? 0 : fcolor.z;
-
-            uint32_t color = 0;
-
-            if (m_bind_texture != nullptr) {
-                float2 uvs = float2(fcolor.x, fcolor.y);
-                color = m_bind_texture->sample( uvs );
+            // backface
+            /*
+            if (w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f) {
+                uint32_t color = _execute_fragment_shader(vtf, pos, v0, v1, v2);
+                int32_t index = i_m + (int32_t)e;
+                m_color_buffer[index] = color;
             }
+            else 
+            */
+            if (w0 <= 0.0f && w1 <= 0.0f && w2 <= 0.0f) {
+                uint32_t color = _execute_fragment_shader(vtf, pos, v0, v1, v2);
 
-            if( w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f ) {
-                //backface here?
-                m_color_buffer[i_m + e] = color;
-            } else if( w0 <= 0.0f && w1 <= 0.0f && w2 <= 0.0f ) {
-               m_color_buffer[i_m + e] = color;
+                int32_t index = i_m + (int32_t)e;
+                m_color_buffer[index] = color;
             }
 
         }
 
+        i_m += m_width;
     }
 
 

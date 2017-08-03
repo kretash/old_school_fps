@@ -28,7 +28,7 @@ void Window::create( int32_t width, int32_t height, int32_t scale ) {
     SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 4 );
     SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
     SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
-    SDL_GL_SetSwapInterval( 1 );
+    SDL_GL_SetSwapInterval( 0 );
 
     SDL_GLContext gl_context = SDL_GL_CreateContext( window );
 

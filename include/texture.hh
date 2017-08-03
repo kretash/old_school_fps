@@ -10,7 +10,7 @@ public:
     ~Texture();
 
     void load(const char* file);
-    uint32_t sample(float2 uv);
+    float4 sample(float2 uv);
 
     uint32_t* m_image_data = nullptr;
     int32_t x = 0;

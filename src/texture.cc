@@ -9,7 +9,7 @@ void Texture::load( const char* file ) {
 }
 
 
-uint32_t Texture::sample( float2 uv ) {
+float4 Texture::sample( float2 uv ) {
 
     float fx = ( float ) x;
     float fy = ( float ) y;
@@ -25,13 +25,23 @@ uint32_t Texture::sample( float2 uv ) {
     int32_t sx = ( int32_t ) ( tuv.x * fx );
     int32_t sy = ( int32_t ) ( tuv.y * fy );
 
-    sx = clamp( sx, 0, x );
-    sy = clamp( sy, 0, y );
+    sx = def_clamp( sx, 0, x );
+    sy = def_clamp( sy, 0, y );
 
     int32_t index = sy*x + sx;
     uint32_t color = m_image_data[index];
 
-    return color;
+    float4 fcolor = float4
+    (
+        (float)(color & 0xffff0000 >> 24),
+        (float)(color & 0x00ff0000 >> 16),
+        (float)(color & 0x0000ff00 >> 8),
+        (float)(color & 0x000000ff)
+    );
+
+    fcolor = fcolor / 255.0f;
+
+    return fcolor;
 }
 
 Texture::~Texture() {
