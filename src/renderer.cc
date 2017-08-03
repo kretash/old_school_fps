@@ -16,6 +16,7 @@ void Renderer::create_buffers(int32_t width, int32_t height) {
     m_f_half_height = (float)m_half_height;
 
     m_color_buffer.resize(height * width);
+    m_depth_buffer.resize( height * width );
 
 }
 
@@ -23,6 +24,9 @@ void Renderer::clear(uint32_t color) {
 
     for (size_t i = 0; i < m_color_buffer.size(); ++i)
         m_color_buffer[i] = color;
+
+    for( size_t i = 0; i < m_depth_buffer.size(); ++i )
+        m_depth_buffer[i] = 100.0f;//std::numeric_limits<int32_t>::max();
 
 }
 
@@ -57,16 +61,14 @@ FragmentOutput Renderer::fragment_shader(VertexToFragment i, Uniforms u) {
 
     float4 color = float4(1.0f, 0.66f, 0.66f, 1.0f);
 
-    out.frag_color = color * dot( i.normal, float3( 0.5f, 0.0f, -0.5f));
+    out.frag_color = color * dot( i.normal, float3( 0.5f, 0.0f, 0.5f));
     //out.frag_color = float4(i.uv, 0.0f, 1.0f);
     //out.frag_color = texture->sample(i.uv);
 
     return out;
 }
 
-uint32_t Renderer::_execute_fragment_shader(VertexToFragment vtf[3], float3 pos, float3 v0, float3 v1, float3 v2) {
-
-    float3 inter = interpolate_floats(pos, v0, v1, v2);
+uint32_t Renderer::_execute_fragment_shader(VertexToFragment vtf[3], float3 inter ) {
 
     VertexToFragment vtf_interpolated;
     vtf_interpolated.pos = inter.x * vtf[0].pos + inter.y * vtf[1].pos + inter.z * vtf[2].pos;
@@ -134,7 +136,6 @@ void Renderer::render_triangle(Triangle t) {
     float3 pos = { min_x, min_y, 0.0f };
     float w0 = 0.0f, w1 = 0.0f, w2 = 0.0f;
 
-    // from 33sm to 25ms
     // All floats now
     // convert all to int32_t
     for (float i = min_y; i < max_y; ++i) {
@@ -151,24 +152,20 @@ void Renderer::render_triangle(Triangle t) {
             w1 = orient2d(v2, v0, p);
             w2 = orient2d(v0, v1, p);
 
-            // backface
-            /*
-            if (w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f) {
-                uint32_t color = _execute_fragment_shader(vtf, pos, v0, v1, v2);
-                int32_t index = i_m + (int32_t)e;
-                m_color_buffer[index] = color;
-            }
-            else 
-            */
-            const float thres = 256.0f;
-            
+            const float thres = 0.0f;
             if (w0 <= thres && w1 <= thres && w2 <= thres ) {
-                uint32_t color = _execute_fragment_shader(vtf, pos, v0, v1, v2);
 
-                int32_t index = i_m + (int32_t)e;
-                m_color_buffer[index] = color;
+                int32_t index = i_m + ( int32_t ) e;
+                float3 inter = interpolate_floats( pos, v0, v1, v2 );
+
+                float depth = inter.x * v0.z + inter.y * v1.z + inter.z * v2.z;
+                if( m_depth_buffer[index] <= depth ) continue;
+
+                uint32_t color = _execute_fragment_shader(vtf, inter );
+
+                m_color_buffer[index] = color; 
+                m_depth_buffer[index] = depth;
             }
-
         }
 
         i_m += m_width;

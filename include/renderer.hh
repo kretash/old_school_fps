@@ -62,7 +62,7 @@ public:
     uint32_t* get_color_buffer();
 private:
 
-    uint32_t _execute_fragment_shader(VertexToFragment vtf[3], float3 pos, float3 v0, float3 v1, float3 v2);
+    uint32_t _execute_fragment_shader(VertexToFragment vtf[3], float3 inter);
 
     int32_t m_width = 0;
     int32_t m_height = 0;
@@ -76,4 +76,5 @@ private:
 
     Uniforms m_uniforms = {};
     std::vector<uint32_t> m_color_buffer;
+    std::vector<float> m_depth_buffer;
 };
