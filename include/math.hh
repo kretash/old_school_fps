@@ -29,8 +29,8 @@ struct float3 {
     float3( float x, float y, float z ) : x( x ), y( y ), z( z ) {}
     float3( float2 v, float z ) : x( v.x ), y( v.y ), z( z ) {}
 
-    inline float length();
-    inline void normalize();
+    float length();
+    void normalize();
 
     float3 operator+( const float3& o ) {
         return float3( this->x + o.x, this->y + o.y, this->z + o.z );

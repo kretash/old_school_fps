@@ -1,5 +1,9 @@
 #include "math.hh"
 
+#ifdef __APPLE__
+#define abs fabs
+#endif
+
 float2 operator*(const float& lhs, const float2& rhs) {
     return float2(rhs.x * lhs, rhs.y * lhs);
 }
@@ -13,7 +17,7 @@ void float3::normalize() {
     x /= m;    y /= m;    z /= m;
 }
 
-inline float float3::length() {
+float float3::length() {
     float square_me = x * x + y * y + z * z;
     return sqrtf( square_me );
 }
