@@ -62,7 +62,7 @@ FragmentOutput Renderer::fragment_shader(VertexToFragment i, Uniforms u) {
     float4 color = float4(1.0f, 0.66f, 0.66f, 1.0f);
 
     out.frag_color = color * dot( i.normal, float3( 0.5f, 0.0f, 0.5f));
-    //out.frag_color = float4(i.uv, 0.0f, 1.0f);
+    out.frag_color = float4( i.normal*0.5f + 1.0f, 1.0f);
     //out.frag_color = texture->sample(i.uv);
 
     return out;
@@ -152,8 +152,7 @@ void Renderer::render_triangle(Triangle t) {
             w1 = orient2d(v2, v0, p);
             w2 = orient2d(v0, v1, p);
 
-            const float thres = 0.0f;
-            if (w0 <= thres && w1 <= thres && w2 <= thres ) {
+            if (w0 <= m_thres && w1 <= m_thres && w2 <= m_thres ) {
 
                 int32_t index = i_m + ( int32_t ) e;
                 float3 inter = interpolate_floats( pos, v0, v1, v2 );

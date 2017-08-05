@@ -42,7 +42,7 @@ int main( int argc, char *argv[] ) {
 
     // ############################### load OBJ 
 
-    std::string inputfile = "../../assets/geometry/lucy.obj";
+    std::string inputfile = "../../assets/geometry/sphere.obj";
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
@@ -112,6 +112,17 @@ int main( int argc, char *argv[] ) {
     while( running ) {
         input->update();
         running = !input->quit();
+
+        if( input->key_down( SDLK_u ) )
+        {
+            renderer->m_thres += 1.0f;
+            std::cout << renderer->m_thres << "\n";
+        }
+        else if( input->key_down( SDLK_j ) ) 
+        {
+            renderer->m_thres -= 1.0f;
+            std::cout << renderer->m_thres << "\n";
+        }
 
         auto start = std::chrono::high_resolution_clock::now();
 

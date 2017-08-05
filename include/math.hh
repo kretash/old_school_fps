@@ -36,8 +36,16 @@ struct float3 {
         return float3( this->x + o.x, this->y + o.y, this->z + o.z );
     }
 
+    float3 operator+( const float& o ) {
+        return float3( this->x + o, this->y + o, this->z + o );
+    }
+
     float3 operator-( const float3& o ) {
         return float3( this->x - o.x, this->y - o.y, this->z - o.z );
+    }
+
+    float3 operator-( const float& o ) {
+        return float3( this->x - o, this->y - o, this->z - o );
     }
 
     float3 operator*( const float& o ) {

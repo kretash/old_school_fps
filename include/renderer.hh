@@ -51,15 +51,16 @@ public:
     VertexToFragment vertex_shader( VertexInput i, Uniforms u );
     FragmentOutput fragment_shader( VertexToFragment i, Uniforms u );
 
-
     void bind_texture( int32_t id, Texture* t);
     void bind_float4x4( int32_t id, float4x4* matrix );
 
     void clear( uint32_t color );
-
     void render_triangle( Triangle t );
 
     uint32_t* get_color_buffer();
+
+    float m_thres = 0.0f;
+
 private:
 
     uint32_t _execute_fragment_shader(VertexToFragment vtf[3], float3 inter);

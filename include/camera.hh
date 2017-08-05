@@ -3,6 +3,8 @@
 #include "math.hh"
 #include "input.hh"
 
+#include <iostream>
+
 class Camera {
 public:
 
@@ -15,6 +17,8 @@ public:
 
         auto input = Input::get_instace();
 
+        //std::cout << m_movedir.x << "__" << m_movedir.y << "\n";
+        
         mouse this_mouse = input->get_mouse();
         if( this_mouse.lmb && !m_drag_camera ) {
             m_last_mouse = this_mouse;
@@ -78,10 +82,15 @@ private:
     const float m_dir_speed = 0.01f;
     const float m_mouse_speed = 0.001f;
 
-    float2 m_movedir = float2( 0.54f, 0.26f );
-    float3 m_eye = float3( 2.5f, 1.8f, -4.2f );
-    float3 m_direction = float3( 0.0f, 5.0f, -10.0f );
+#if 1 // camera for Lucy
+    float2 m_movedir = float2( -0.32f, -0.08f );
+    float3 m_eye = float3( 0.0f, 3.0f, -15.0f );
+#else
+    float2 m_movedir = float2( -0.32f, -0.08f );
+    float3 m_eye = float3( 0.0f, 3.0f, -15.0f );
+#endif
 
+    float3 m_direction = float3( 0.0f, 0.0f, 0.0f );
     float4x4 m_view = float4x4( 1.0f );
     float4x4 m_proj = float4x4( 1.0f );
 
