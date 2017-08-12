@@ -59,7 +59,7 @@ public:
 
     uint32_t* get_color_buffer();
 
-    float m_thres = 0.0f;
+    float3 m_thres = {};
 
 private:
 

@@ -3,25 +3,29 @@
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 
+#include "externals/imgui_impl_sdl_gl3.h"
+
 #include "window.hh"
 #include "gl_helper.hh"
 #include "input.hh"
 
-Window::Window() {
+Window::Window()
+{
 
 }
 
-void Window::create( int32_t width, int32_t height, int32_t scale ) {
+void Window::create( int32_t width, int32_t height, int32_t scale )
+{
 
     m_width = width;
     m_height = height;
 
     int sdl_init_ = SDL_Init( SDL_INIT_VIDEO );
-    if( sdl_init_ < 0 )
+    if ( sdl_init_ < 0 )
         std::cout << "SDL error ->" << SDL_GetError() << std::endl;
 
     SDL_Window *window = SDL_CreateWindow( "renderer", SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED, width * scale, height * scale, SDL_WINDOW_OPENGL );
+                                           SDL_WINDOWPOS_CENTERED, width * scale, height * scale, SDL_WINDOW_OPENGL );
 
     m_blk_window = window;
 
@@ -34,7 +38,8 @@ void Window::create( int32_t width, int32_t height, int32_t scale ) {
 
     glewExperimental = GL_TRUE;
     GLenum glew_init_;
-    if( ( glew_init_ = glewInit() ) != GLEW_OK ) {
+    if ( ( glew_init_ = glewInit() ) != GLEW_OK )
+    {
         std::cout << glewGetErrorString( glew_init_ ) << std::endl;
         assert( false && "GLEW INIT FAILED" );
     }
@@ -52,12 +57,15 @@ void Window::create( int32_t width, int32_t height, int32_t scale ) {
     std::cout << "OpenGL Version : " << glGetString( GL_VERSION ) << '\n';
     std::cout << "GLSL Version   : " << glGetString( GL_SHADING_LANGUAGE_VERSION ) << '\n';
 
+    ImGui_ImplSdlGL3_Init( window );
+
     glGenVertexArrays( 1, &m_vao );
     glBindVertexArray( m_vao );
 
     m_program = _create_program( "vs_basic.glsl", "fs_basic.glsl" );
 
-    if( m_program == -1 ){
+    if ( m_program == -1 )
+    {
         Input::get_instace()->force_quit();
         return;
     }
@@ -75,7 +83,16 @@ void Window::create( int32_t width, int32_t height, int32_t scale ) {
 
 }
 
-void Window::present( void* color_buffer ) {
+void Window::new_frame()
+{
+    SDL_Window* window = ( SDL_Window* ) m_blk_window;
+    ImGui_ImplSdlGL3_NewFrame( window );
+}
+
+void Window::present( void* color_buffer )
+{
+    SDL_Window* window = ( SDL_Window* ) m_blk_window;
+
 
     glBindTexture( GL_TEXTURE_2D, m_fb_texture );
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, color_buffer );
@@ -86,12 +103,17 @@ void Window::present( void* color_buffer ) {
 
     glDrawArrays( GL_TRIANGLES, 0, 3 );
 
-    SDL_Window* window = ( SDL_Window* ) m_blk_window;
+    ImGui::Render();
+
     SDL_GL_SwapWindow( window );
 }
 
-Window::~Window() {
+Window::~Window()
+{
     SDL_Window* window = ( SDL_Window* ) m_blk_window;
+
+    ImGui_ImplSdlGL3_Shutdown();
+    //SDL_GL_DeleteContext( glcontext );
     SDL_DestroyWindow( window );
     SDL_Quit();
 }

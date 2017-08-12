@@ -1,7 +1,7 @@
 #include "texture.hh"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "external/stb_image.h"
+#include "externals/stb_image.h"
 
 void Texture::load( const char* file ) {
     n = 4;

@@ -8,6 +8,7 @@ public:
     ~Window();
 
     void create( int32_t width = 320, int32_t height = 240, int32_t scale = 3 );
+    void new_frame();
     void present( void* color_buffer );
 
 private:

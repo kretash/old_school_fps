@@ -17,9 +17,12 @@
 #include "camera.hh"
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "external/tiny_obj_loader.h"
+#include "externals/tiny_obj_loader.h"
 
-int main( int argc, char *argv[] ) {
+#include "externals/imgui.h"
+
+int main( int argc, char *argv[] )
+{
 
     bool running = true;
     const int32_t width = 1280;
@@ -38,7 +41,7 @@ int main( int argc, char *argv[] ) {
     Texture checker;
     checker.load( "../../assets/texture/checker.png" );
 
-    Camera camera(width, height);
+    Camera camera( width, height );
 
     // ############################### load OBJ 
 
@@ -50,22 +53,26 @@ int main( int argc, char *argv[] ) {
     std::string err;
     bool ret = tinyobj::LoadObj( &attrib, &shapes, &materials, &err, inputfile.c_str() );
 
-    if( !err.empty() ) {
+    if ( !err.empty() )
+    {
         std::cerr << err << std::endl;
     }
 
-    if( !ret ) { return 0; }
+    if ( !ret ) { return 0; }
 
     std::vector<Triangle> triangles;
     std::vector<Vertice> vertices;
 
-    for( size_t s = 0; s < shapes.size(); s++ ) {
+    for ( size_t s = 0; s < shapes.size(); s++ )
+    {
 
         size_t index_offset = 0;
-        for( size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++ ) {
+        for ( size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++ )
+        {
             int fv = shapes[s].mesh.num_face_vertices[f];
 
-            for( size_t v = 0; v < fv; v++ ) {
+            for ( size_t v = 0; v < fv; v++ )
+            {
 
                 tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
 
@@ -75,13 +82,15 @@ int main( int argc, char *argv[] ) {
                 vertice.pos.y = attrib.vertices[3 * idx.vertex_index + 1];
                 vertice.pos.z = attrib.vertices[3 * idx.vertex_index + 2];
 
-                if (idx.normal_index != -1) {
+                if ( idx.normal_index != -1 )
+                {
                     vertice.normal.x = attrib.normals[3 * idx.normal_index + 0];
                     vertice.normal.y = attrib.normals[3 * idx.normal_index + 1];
                     vertice.normal.z = attrib.normals[3 * idx.normal_index + 2];
                 }
 
-                if (idx.texcoord_index != -1) {
+                if ( idx.texcoord_index != -1 )
+                {
                     vertice.uv.x = attrib.texcoords[2 * idx.texcoord_index + 0];
                     vertice.uv.y = attrib.texcoords[2 * idx.texcoord_index + 1];
                 }
@@ -95,7 +104,8 @@ int main( int argc, char *argv[] ) {
     }
 
     const size_t v_count = vertices.size() / 3;
-    for( size_t i = 0; i < v_count; ++i ) {
+    for ( size_t i = 0; i < v_count; ++i )
+    {
 
         Triangle t;
         t.triangle[0] = vertices[i * 3 + 0];
@@ -109,39 +119,30 @@ int main( int argc, char *argv[] ) {
 
     float time = 0.0f;
 
-    while( running ) {
+    while ( running )
+    {
         input->update();
         running = !input->quit();
 
-        if( input->key_down( SDLK_u ) )
-        {
-            renderer->m_thres += 1.0f;
-            std::cout << renderer->m_thres << "\n";
-        }
-        else if( input->key_down( SDLK_j ) ) 
-        {
-            renderer->m_thres -= 1.0f;
-            std::cout << renderer->m_thres << "\n";
-        }
-
         auto start = std::chrono::high_resolution_clock::now();
 
+        window->new_frame();
         camera.update();
 
-        float4x4 model_mat(1.0f);
-        model_mat.rotate_y(time* 0.25f);
+        float4x4 model_mat( 1.0f );
+        model_mat.rotate_y( time * 0.25f );
 
         float4x4 view_mat = camera.get_view();
         float4x4 proj_mat = camera.get_proj();
         float4x4 model_view_mat = view_mat * model_mat;
         float4x4 mvp = proj_mat * model_view_mat;
-        
+
         renderer->clear( 0xff111111 );
 
         renderer->bind_texture( 0, &checker );
-        renderer->bind_float4x4(0, &mvp );
+        renderer->bind_float4x4( 0, &mvp );
 
-        for( size_t i = 0; i < triangles.size(); ++i )
+        for ( size_t i = 0; i < triangles.size(); ++i )
         {
             renderer->render_triangle( triangles[i] );
         }
@@ -150,11 +151,16 @@ int main( int argc, char *argv[] ) {
 
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> diff = end - start;
-        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
-        std::cout << "Frame time: " << ms.count() << "ms\n";
+        auto ms = std::chrono::duration_cast< std::chrono::milliseconds >( diff );
+
+        ImGui::Text( (" Frame Time:  " + std::to_string( ms.count() ) + "ms\n").c_str() );
+        ImGui::Checkbox("Imgui Focus", &input->imGUIFocus );
+        ImGui::SliderFloat( "X", &renderer->m_thres.x, -10.0f, 100.0f );
+        ImGui::SliderFloat( "Y", &renderer->m_thres.y, -10.0f, 100.0f );
+        ImGui::SliderFloat( "Z", &renderer->m_thres.z, -10.0f, 100.0f );
 
         window->present( final_buffer );
-        float frame_time = (float)ms.count() / 1000.0f;
+        float frame_time = ( float ) ms.count() / 1000.0f;
         time += frame_time;
     }
 

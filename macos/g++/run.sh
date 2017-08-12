@@ -1,1 +1,0 @@
-../../build/macos/program.out

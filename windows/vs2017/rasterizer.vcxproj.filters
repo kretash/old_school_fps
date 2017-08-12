@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{89AF369E-F58E-B539-FEA6-40106A051C9B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\externals">
+      <UniqueIdentifier>{9B6A4415-0781-42AB-50F8-CDCCBC4D1333}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\external">
+      <UniqueIdentifier>{4C194D87-387C-DC2B-E101-15E2CD43A8AE}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\camera.hh">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\gl_helper.hh">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\input.hh">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\math.hh">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\renderer.hh">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\texture.hh">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\window.hh">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\externals\imconfig.h">
+      <Filter>include\externals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\externals\imgui.h">
+      <Filter>include\externals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\externals\imgui_impl_sdl_gl3.h">
+      <Filter>include\externals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\externals\imgui_internal.h">
+      <Filter>include\externals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\externals\stb_image.h">
+      <Filter>include\externals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\externals\stb_rect_pack.h">
+      <Filter>include\externals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\externals\stb_textedit.h">
+      <Filter>include\externals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\externals\stb_truetype.h">
+      <Filter>include\externals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\externals\tiny_obj_loader.h">
+      <Filter>include\externals</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\main.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\renderer.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\texture.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\window.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\external\imgui.cpp">
+      <Filter>src\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\external\imgui_demo.cpp">
+      <Filter>src\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\external\imgui_draw.cpp">
+      <Filter>src\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\external\imgui_impl_sdl_gl3.cpp">
+      <Filter>src\external</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

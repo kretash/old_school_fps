@@ -4,6 +4,8 @@
 #include <map>
 #include <SDL2/SDL.h>
 
+#include "externals/imgui_impl_sdl_gl3.h"
+
 struct mouse {
     float x = 0.0f, y = 0.0f;
     bool lmb = false, mmb = false, rmb = false;
@@ -22,6 +24,11 @@ public:
     void update() {
         SDL_Event event_;
         while( SDL_PollEvent( &event_ ) ) {
+
+            ImGui_ImplSdlGL3_ProcessEvent( &event_ );
+
+            if( imGUIFocus ) continue;
+
             switch( event_.type ) {
             case SDL_QUIT:
                 m_quit = true;
@@ -63,7 +70,7 @@ public:
     mouse get_mouse() { return m_mouse; }
     bool quit() { return m_quit; }
     void force_quit() { m_quit = true; }
-
+    bool imGUIFocus = false;
     Input() {};
 private:
     std::map<SDL_Keycode, bool> m_downkeys;
