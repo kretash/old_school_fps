@@ -9,7 +9,7 @@ class Camera {
 public:
 
     Camera( int32_t width, int32_t height ) {
-        m_proj.perspective( 75.0f, ( float ) width / ( float ) height, 0.1f, 100.0f );
+        m_proj.perspective( 75.0f, ( float ) width / ( float ) height, 1.0f, 10.0f );
     }
     ~Camera() {}
 
@@ -82,7 +82,7 @@ private:
     const float m_dir_speed = 0.01f;
     const float m_mouse_speed = 0.001f;
 
-#if 0 // camera for Lucy
+#if 1 // camera for Lucy
     float2 m_movedir = float2( -0.32f, -0.08f );
     float3 m_eye = float3( 0.0f, 3.0f, -15.0f );
 #else

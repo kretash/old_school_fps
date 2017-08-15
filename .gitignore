@@ -42,3 +42,8 @@ windows/vs2015/x64/*
 build/old_school_fps.exe
 build/old_school_fps.iobj
 build/old_school_fps.ipdb
+bin/rasterizer.exe
+bin/rasterizer-d.exe
+bin/rasterizer-d.ilk
+bin/rasterizer.exe
+bin/rasterizer.exe

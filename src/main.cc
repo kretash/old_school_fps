@@ -45,7 +45,7 @@ int main( int argc, char *argv[] )
 
     // ############################### load OBJ 
 
-    std::string inputfile = "../../assets/geometry/sphere.obj";
+    std::string inputfile = "../../assets/geometry/lucy.obj";
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
@@ -130,7 +130,7 @@ int main( int argc, char *argv[] )
         camera.update();
 
         float4x4 model_mat( 1.0f );
-        model_mat.rotate_y( time * 0.25f );
+        model_mat.rotate_y( -M_PI / 2.0f );
 
         float4x4 view_mat = camera.get_view();
         float4x4 proj_mat = camera.get_proj();

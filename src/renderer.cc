@@ -68,7 +68,7 @@ FragmentOutput Renderer::fragment_shader( VertexToFragment i, Uniforms u )
     float4 color = float4( 1.0f, 0.66f, 0.66f, 1.0f );
 
     out.frag_color = color * dot( i.normal, float3( 0.5f, 0.0f, 0.5f ) );
-    out.frag_color = float4( i.normal*0.5f + 1.0f, 1.0f );
+    //out.frag_color = float4( i.normal*0.5f + 1.0f, 1.0f );
     //out.frag_color = texture->sample(i.uv);
 
     return out;
@@ -134,12 +134,12 @@ void Renderer::render_triangle( Triangle t )
     float min_y = std::min( v0.y, std::min( v1.y, v2.y ) );
     float max_y = std::max( v0.y, std::max( v1.y, v2.y ) );
 
-    max_x = def_clamp( max_x, 0.0f, m_f_width );
-    min_x = def_clamp( min_x, 0.0f, m_f_width );
-    max_y = def_clamp( max_y, 0.0f, m_f_height );
-    min_y = def_clamp( min_y, 0.0f, m_f_height );
+    max_x = std::ceilf( def_clamp( max_x, 0.0f, m_f_width ));
+    min_x = std::floorf( def_clamp( min_x, 0.0f, m_f_width ) );
+    max_y = std::ceilf( def_clamp( max_y, 0.0f, m_f_height ) );
+    min_y = std::floorf( def_clamp( min_y, 0.0f, m_f_height ) );
 
-    int32_t i_m = ( int32_t ) min_y * m_width;
+    int32_t i_m = ( int32_t ) std::floorf( min_y ) * m_width;
 
     float2 p = { min_x, min_y };
     float3 pos = { min_x, min_y, 0.0f };
@@ -147,13 +147,13 @@ void Renderer::render_triangle( Triangle t )
 
     // All floats now
     // convert all to int32_t
-    for ( float i = min_y; i < max_y; ++i )
+    for ( float i = min_y; i <= max_y; ++i )
     {
 
         p.y = i;
         pos.y = i;
 
-        for ( float e = min_x; e < max_x; ++e )
+        for ( float e = min_x; e <= max_x; ++e )
         {
 
             p.x = e;
@@ -165,15 +165,16 @@ void Renderer::render_triangle( Triangle t )
 
             if ( w0 <= m_thres.x && w1 <= m_thres.y && w2 <= m_thres.z )
             {
-                int32_t index = i_m + ( int32_t ) e;
+                int32_t index = i_m + ( int32_t ) std::floorf( e );
                 float3 inter = interpolate_floats( pos, v0, v1, v2 );
 
-                float depth = inter.x * v0.z + inter.y * v1.z + inter.z * v2.z;
+                //float depth = inter.x * v0.z + inter.y * v1.z + inter.z * v2.z;
+                float depth = v1.z;
                 if ( m_depth_buffer[index] <= depth ) continue;
 
                 uint32_t color = _execute_fragment_shader( vtf, inter );
 
-                m_color_buffer[index] = color;
+                m_color_buffer[index] = depth;
                 m_depth_buffer[index] = depth;
             }
         }
