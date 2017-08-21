@@ -9,6 +9,7 @@
 #include <iostream>
 #include <chrono>
 #include <ctime>
+#include <random>
 
 #include "input.hh"
 #include "renderer.hh"
@@ -23,7 +24,6 @@
 
 int main( int argc, char *argv[] )
 {
-
     bool running = true;
     const int32_t width = 1280;
     const int32_t height = 720;
@@ -45,7 +45,7 @@ int main( int argc, char *argv[] )
 
     // ############################### load OBJ 
 
-    std::string inputfile = "../../assets/geometry/sphere.obj";
+    std::string inputfile = "../../assets/geometry/cube.obj";
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
@@ -118,6 +118,14 @@ int main( int argc, char *argv[] )
     // ################# END OF OBJ LOAD
 
     float time = 0.0f;
+    const int32_t t = 2;
+    std::vector<float4> colors
+    {
+        float4( 1.0f, 0.0f, 0.0f, 1.0f ),
+        float4( 0.0f, 1.0f, 0.0f, 1.0f ),
+        float4( 0.0f, 0.0f, 1.0f, 1.0f ),
+        float4( 1.0f, 0.0f, 1.0f, 1.0f )
+    } ;
 
     while ( running )
     {
@@ -129,22 +137,31 @@ int main( int argc, char *argv[] )
         window->new_frame();
         camera.update();
 
-        float4x4 model_mat( 1.0f );
-        model_mat.rotate_y( time*0.1f );
-
         float4x4 view_mat = camera.get_view();
         float4x4 proj_mat = camera.get_proj();
-        float4x4 model_view_mat = view_mat * model_mat;
-        float4x4 mvp = proj_mat * model_view_mat;
-
         renderer->clear( 0xff111111 );
 
-        renderer->bind_texture( 0, &checker );
-        renderer->bind_float4x4( 0, &mvp );
-
-        for ( size_t i = 0; i < triangles.size(); ++i )
+        for( int32_t y = 0; y < t; ++y )
         {
-            renderer->render_triangle( triangles[i] );
+            for ( int32_t x = 0; x < t; ++x )
+            {
+                float4x4 model_mat( 1.0f );
+                model_mat.translate( x*1.1f, 
+                                     sinf(time+(float)x/5.0f)*cosf( time + ( float ) y / 5.0f )*0.25f,
+                                     y*1.1f );
+
+                float4x4 model_view_mat = view_mat * model_mat;
+                float4x4 mvp = proj_mat * model_view_mat;
+                
+                renderer->bind_texture( 0, &checker );
+                renderer->bind_float4x4( 0, &mvp );
+                renderer->m_debug_color = colors[y*t+x];
+
+                for ( size_t i = 0; i < triangles.size(); ++i )
+                {
+                    renderer->render_triangle( triangles[i] );
+                }
+            }
         }
 
         auto final_buffer = renderer->get_color_buffer();
@@ -155,9 +172,6 @@ int main( int argc, char *argv[] )
 
         ImGui::Text( (" Frame Time:  " + std::to_string( ms.count() ) + "ms\n").c_str() );
         ImGui::Checkbox("Imgui Focus", &input->imGUIFocus );
-        ImGui::SliderFloat( "X", &renderer->m_thres.x, -10.0f, 100.0f );
-        ImGui::SliderFloat( "Y", &renderer->m_thres.y, -10.0f, 100.0f );
-        ImGui::SliderFloat( "Z", &renderer->m_thres.z, -10.0f, 100.0f );
 
         window->present( final_buffer );
         float frame_time = ( float ) ms.count() / 1000.0f;

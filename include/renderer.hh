@@ -59,8 +59,7 @@ public:
 
     uint32_t* get_color_buffer();
 
-    float3 m_thres = {};
-
+    float4 m_debug_color = float4(1.0f, 0.0f, 1.0f, 1.0f);
 private:
 
     uint32_t _execute_fragment_shader(VertexToFragment vtf[3], float3 inter);

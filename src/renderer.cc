@@ -29,7 +29,7 @@ void Renderer::clear( uint32_t color ) {
         m_color_buffer[i] = color;
 
     for( size_t i = 0; i < m_depth_buffer.size(); ++i )
-        m_depth_buffer[i] = 100.0f;//std::numeric_limits<int32_t>::max();
+        m_depth_buffer[i] = std::numeric_limits<float>::max();
 
 }
 
@@ -65,8 +65,7 @@ FragmentOutput Renderer::fragment_shader( VertexToFragment i, Uniforms u ) {
     float4 color = float4( 1.0f, 0.66f, 0.66f, 1.0f );
 
     out.frag_color = color * dot( i.normal, float3( 0.5f, 0.0f, 0.5f ) );
-    //out.frag_color = float4( i.normal*0.5f + 1.0f, 1.0f );
-    //out.frag_color = texture->sample(i.uv);
+    out.frag_color = m_debug_color;
 
     return out;
 }
@@ -152,13 +151,13 @@ void Renderer::render_triangle( Triangle t ) {
             w1 = orient2d( v2, v0, p );
             w2 = orient2d( v0, v1, p );
 
-            if( w0 <= m_thres.x && w1 <= m_thres.y && w2 <= m_thres.z ) {
+            if( w0 <= 0.0f && w1 <= 0.0f && w2 <= 0.0f ) {
                 int32_t index = i_m + ( int32_t ) std::floorf( e );
                 float3 inter = interpolate_floats( pos, v0, v1, v2 );
 
-                float depth = inter.x * v0.z + inter.y * v1.z + inter.z * v2.z;
-                //float depth = v1.z;
-                if( m_depth_buffer[index] <= depth ) {
+                float3 position = inter.x * v0 + inter.y * v1 + inter.z * v2;
+                float depth = -position.z;
+                if( m_depth_buffer[index] < depth ) {
                     continue;
                 }
 
@@ -166,7 +165,7 @@ void Renderer::render_triangle( Triangle t ) {
 
                 m_color_buffer[index] = create_color( (depth-mind)/maxd, 0.0f, 0.0f);
                 m_depth_buffer[index] = depth;
-
+                
                 maxd = maxd > depth ? maxd : depth;
                 mind = mind < depth ? mind : depth;
 
@@ -176,7 +175,7 @@ void Renderer::render_triangle( Triangle t ) {
         i_m += m_width;
     }
 
-    std::cout << "min: " << mind << ", maxd: " << maxd << "\n";
+    //std::cout << "min: " << mind << ", maxd: " << maxd << "\n";
 
     //std::unordered_map<float, bool> depths;
 
