@@ -82,11 +82,11 @@ private:
     const float m_dir_speed = 0.01f;
     const float m_mouse_speed = 0.001f;
 
-#if 1 // camera for Lucy
+#if 0 // camera for Lucy
     float2 m_movedir = float2( -0.32f, -0.08f );
     float3 m_eye = float3( 0.0f, 3.0f, -15.0f );
 #else
-    float2 m_movedir = float2( -0.32f, -0.08f );
+    float2 m_movedir = float2( 0.0f, 0.0f );
     float3 m_eye = float3( 0.0f, 1.0f, -10.0f );
 #endif
 

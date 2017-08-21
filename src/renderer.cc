@@ -1,10 +1,12 @@
+#include <algorithm>
+#include <unordered_map>
+#include <iostream>
+
 #include "renderer.hh"
 #include "texture.hh"
+#include "helper.hh"
 
-#include <algorithm>
-
-void Renderer::create_buffers( int32_t width, int32_t height )
-{
+void Renderer::create_buffers( int32_t width, int32_t height ) {
 
     m_width = width;
     m_height = height;
@@ -21,29 +23,25 @@ void Renderer::create_buffers( int32_t width, int32_t height )
 
 }
 
-void Renderer::clear( uint32_t color )
-{
+void Renderer::clear( uint32_t color ) {
 
-    for ( size_t i = 0; i < m_color_buffer.size(); ++i )
+    for( size_t i = 0; i < m_color_buffer.size(); ++i )
         m_color_buffer[i] = color;
 
-    for ( size_t i = 0; i < m_depth_buffer.size(); ++i )
+    for( size_t i = 0; i < m_depth_buffer.size(); ++i )
         m_depth_buffer[i] = 100.0f;//std::numeric_limits<int32_t>::max();
 
 }
 
-void Renderer::bind_texture( int32_t id, Texture* texture )
-{
+void Renderer::bind_texture( int32_t id, Texture* texture ) {
     m_uniforms.texture[id] = texture;
 }
 
-void Renderer::bind_float4x4( int32_t id, float4x4* matrix )
-{
+void Renderer::bind_float4x4( int32_t id, float4x4* matrix ) {
     m_uniforms.matrix[id] = matrix;
 }
 
-VertexToFragment Renderer::vertex_shader( VertexInput i, Uniforms u )
-{
+VertexToFragment Renderer::vertex_shader( VertexInput i, Uniforms u ) {
     VertexToFragment out;
 
     const int32_t id = 0;
@@ -58,8 +56,7 @@ VertexToFragment Renderer::vertex_shader( VertexInput i, Uniforms u )
     return out;
 }
 
-FragmentOutput Renderer::fragment_shader( VertexToFragment i, Uniforms u )
-{
+FragmentOutput Renderer::fragment_shader( VertexToFragment i, Uniforms u ) {
     FragmentOutput out;
 
     const int32_t id = 0;
@@ -74,8 +71,7 @@ FragmentOutput Renderer::fragment_shader( VertexToFragment i, Uniforms u )
     return out;
 }
 
-uint32_t Renderer::_execute_fragment_shader( VertexToFragment vtf[3], float3 inter )
-{
+uint32_t Renderer::_execute_fragment_shader( VertexToFragment vtf[3], float3 inter ) {
 
     VertexToFragment vtf_interpolated;
     vtf_interpolated.pos = inter.x * vtf[0].pos + inter.y * vtf[1].pos + inter.z * vtf[2].pos;
@@ -86,22 +82,17 @@ uint32_t Renderer::_execute_fragment_shader( VertexToFragment vtf[3], float3 int
 
     output.frag_color.clamp( 0.0f, 1.0f );
 
-    uint32_t color =
-        ( uint8_t ) ( output.frag_color.w * 255.0f ) << 24 |
-        ( uint8_t ) ( output.frag_color.z * 255.0f ) << 16 |
-        ( uint8_t ) ( output.frag_color.y * 255.0f ) << 8 |
-        ( uint8_t ) ( output.frag_color.x * 255.0f );
-
-    return color;
+    return create_color( output.frag_color );
 }
 
-void Renderer::render_triangle( Triangle t )
-{
+float mind = std::numeric_limits<float>::max();
+float maxd = 0.0f;
+
+void Renderer::render_triangle( Triangle t ) {
 
     VertexToFragment vtf[3];
 
-    for ( int32_t i = 0; i < 3; ++i )
-    {
+    for( int32_t i = 0; i < 3; ++i ) {
         VertexInput input;
 
         input.pos = t.triangle[i].pos;
@@ -134,9 +125,9 @@ void Renderer::render_triangle( Triangle t )
     float min_y = std::min( v0.y, std::min( v1.y, v2.y ) );
     float max_y = std::max( v0.y, std::max( v1.y, v2.y ) );
 
-    max_x = std::ceilf( def_clamp( max_x, 0.0f, m_f_width ));
+    max_x = std::ceilf( def_clamp( max_x, 0.0f, m_f_width-1.0f ) );
     min_x = std::floorf( def_clamp( min_x, 0.0f, m_f_width ) );
-    max_y = std::ceilf( def_clamp( max_y, 0.0f, m_f_height ) );
+    max_y = std::ceilf( def_clamp( max_y, 0.0f, m_f_height-1.0f ) );
     min_y = std::floorf( def_clamp( min_y, 0.0f, m_f_height ) );
 
     int32_t i_m = ( int32_t ) std::floorf( min_y ) * m_width;
@@ -147,14 +138,12 @@ void Renderer::render_triangle( Triangle t )
 
     // All floats now
     // convert all to int32_t
-    for ( float i = min_y; i <= max_y; ++i )
-    {
+    for( float i = min_y; i <= max_y; ++i ) {
 
         p.y = i;
         pos.y = i;
 
-        for ( float e = min_x; e <= max_x; ++e )
-        {
+        for( float e = min_x; e <= max_x; ++e ) {
 
             p.x = e;
             pos.x = e;
@@ -163,29 +152,44 @@ void Renderer::render_triangle( Triangle t )
             w1 = orient2d( v2, v0, p );
             w2 = orient2d( v0, v1, p );
 
-            if ( w0 <= m_thres.x && w1 <= m_thres.y && w2 <= m_thres.z )
-            {
+            if( w0 <= m_thres.x && w1 <= m_thres.y && w2 <= m_thres.z ) {
                 int32_t index = i_m + ( int32_t ) std::floorf( e );
                 float3 inter = interpolate_floats( pos, v0, v1, v2 );
 
-                //float depth = inter.x * v0.z + inter.y * v1.z + inter.z * v2.z;
-                float depth = v1.z;
-                if ( m_depth_buffer[index] <= depth ) continue;
+                float depth = inter.x * v0.z + inter.y * v1.z + inter.z * v2.z;
+                //float depth = v1.z;
+                if( m_depth_buffer[index] <= depth ) {
+                    continue;
+                }
 
                 uint32_t color = _execute_fragment_shader( vtf, inter );
 
-                m_color_buffer[index] = depth;
+                m_color_buffer[index] = create_color( (depth-mind)/maxd, 0.0f, 0.0f);
                 m_depth_buffer[index] = depth;
+
+                maxd = maxd > depth ? maxd : depth;
+                mind = mind < depth ? mind : depth;
+
             }
         }
 
         i_m += m_width;
     }
 
+    std::cout << "min: " << mind << ", maxd: " << maxd << "\n";
+
+    //std::unordered_map<float, bool> depths;
+
+    //for( size_t i = 0; i < m_depth_buffer.size(); ++i ){
+    //    if( depths.find( m_depth_buffer[i] ) == depths.end() ){
+    //    
+    //        //std::cout << m_depth_buffer[i] << "\n";
+    //        depths.insert( { m_depth_buffer[i], true } );
+    //    }
+    //}
 
 }
 
-uint32_t* Renderer::get_color_buffer()
-{
+uint32_t* Renderer::get_color_buffer() {
     return &m_color_buffer[0];
 }
